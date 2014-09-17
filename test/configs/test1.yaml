@@ -8,6 +8,9 @@ robot:
           link: base_laser
         - type: lrf
           link: torso_laser
+    joints:
+        - name: torso_joint
+          position: 0.4
 
 objects:
     - id: table
