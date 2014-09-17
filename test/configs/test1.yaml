@@ -1,6 +1,6 @@
 robot:
     urdf: /home/sdries/ros/hydro/system/src/amigo_description/urdf/amigo.urdf
-    pose: {x: 0, y: 0, z: 0}
+    pose: {x: 0, y: 0, z: 0}   # Does not yet work
     sensors:
         - type: depth_sensor
           link: top_kinect/openni_rgb_optical_frame
@@ -11,11 +11,15 @@ robot:
     joints:
         - name: torso_joint
           position: 0.4
+        - name: neck_pan_joint
+          position: 0.5
+        - name: neck_tilt_joint
+          position: 0.1
 
 objects:
-    - id: table
-      type: kitchen_table
-      pose: {x: 5, y: 1, z: 0}
+    - id: walls
+      type: rwc2014.walls
+      pose: {x: -1.83, y: -0.645, z: 0}
 #    - id: coke
 #      type: blaa
 #      pose: {x: 5.3, y: 0, z: 0.9}
