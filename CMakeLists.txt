@@ -4,6 +4,8 @@ project(ed_simulator)
 find_package(catkin REQUIRED COMPONENTS
     ed
     ed_object_models
+    urdf
+    kdl_parser
 )
 
 # find_package(Boost REQUIRED COMPONENTS system program_options)
@@ -59,6 +61,7 @@ add_library(ed_simulator_plugin
     src/simulator_plugin.cpp
     src/simulator.cpp
     src/object.cpp
+    src/robot.cpp
 )
 target_link_libraries(ed_simulator_plugin ${catkin_LIBRARIES})
 

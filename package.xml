@@ -16,4 +16,10 @@
   <build_depend>ed_object_models</build_depend>
   <run_depend>ed_object_models</run_depend>
 
+  <build_depend>urdf</build_depend>
+  <run_depend>urdfs</run_depend>
+
+  <build_depend>kdl_parser</build_depend>
+  <run_depend>kdl_parser</run_depend>
+
 </package>

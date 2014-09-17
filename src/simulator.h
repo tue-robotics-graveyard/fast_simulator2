@@ -28,6 +28,8 @@ public:
 
 private:
 
+    RobotPtr robot_;
+
     std::map<UUID, ObjectConstPtr> objects_;
 
 };

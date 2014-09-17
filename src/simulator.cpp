@@ -1,6 +1,7 @@
 #include "simulator.h"
 
 #include "object.h"
+#include "robot.h"
 
 #include <ed/models/loader.h>
 
@@ -23,6 +24,19 @@ Simulator::~Simulator()
 
 void Simulator::configure(tue::Configuration config)
 {
+    if (config.readGroup("robot"))
+    {
+        RobotPtr robot(new Robot());
+        robot->configure(config.limitScope());
+
+        if (!config.hasError())
+        {
+            robot_ = robot;
+        }
+
+        config.endGroup();
+    }
+
     if (config.readArray("objects"))
     {
         while (config.nextArrayItem())

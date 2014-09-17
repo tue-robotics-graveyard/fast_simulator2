@@ -13,6 +13,10 @@ class Object;
 typedef boost::shared_ptr<Object> ObjectPtr;
 typedef boost::shared_ptr<const Object> ObjectConstPtr;
 
+class Robot;
+typedef boost::shared_ptr<Robot> RobotPtr;
+typedef boost::shared_ptr<const Robot> RobotConstPtr;
+
 }
 
 #endif

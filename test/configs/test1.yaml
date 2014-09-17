@@ -1,9 +1,19 @@
 robot:
-    type: amigo
+    urdf: /home/sdries/ros/hydro/system/src/amigo_description/urdf/amigo.urdf
     pose: {x: 0, y: 0, z: 0}
+    sensors:
+        - type: kinect
+          link: top_kinect/openni_rgb_optical_frame
+        - type: lrf
+          link: base_laser
+        - type: lrf
+          link: torso_laser
 
 objects:
     - id: table
       type: kitchen_table
       pose: {x: 5, y: 0, z: 0}
+#    - id: coke
+#      type: blaa
+#      pose: {x: 5.3, y: 0, z: 0.9}
 
