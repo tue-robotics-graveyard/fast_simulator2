@@ -3,6 +3,8 @@
 
 #include "object.h"
 
+#include <geolib/sensors/LaserRangeFinder.h>
+
 namespace sim
 {
 
@@ -16,6 +18,10 @@ public:
     virtual ~LaserRangeFinder();
 
     void sense(const World& world, const geo::Pose3D& sensor_pose) const;
+
+private:
+
+    geo::LaserRangeFinder lrf_;
 
 };
 
