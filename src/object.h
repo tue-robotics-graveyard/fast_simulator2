@@ -13,10 +13,13 @@ class Object
 
 public:
 
-    Object(const UUID& id);
+    Object(const UUID& id = "");
 
     /// Returns an updated version of this object. Returns null pointer if object did not change.
-    virtual ObjectPtr step(double dt) const;
+    virtual ObjectPtr step(const World& world, double dt) const;
+
+    // TODO: move this to seperate Sensor class
+    virtual void sense(const World& world, const geo::Pose3D& sensor_pose) const {}
 
     const UUID& id() const { return id_; }
     const std::string& type() const { return type_; }

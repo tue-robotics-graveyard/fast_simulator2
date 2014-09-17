@@ -13,7 +13,7 @@ Object::Object(const UUID& id)
 
 // ----------------------------------------------------------------------------------------------------
 
-ObjectPtr Object::step(double dt) const
+ObjectPtr Object::step(const World& world, double dt) const
 {
     if (moving_)
     {

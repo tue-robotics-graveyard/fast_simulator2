@@ -27,6 +27,8 @@ public:
 
     void setJoint(const std::string& name, double pos) { joint_positions_[name] = pos; }
 
+    void getSensors(std::vector<ObjectConstPtr>& sensors, std::vector<geo::Pose3D>& poses);
+
 private:
 
     KDL::Tree tree_;
@@ -36,6 +38,8 @@ private:
 
     /// Link positions relative to the robot pose
     std::map<std::string, geo::Pose3D> link_positions_;
+
+    std::map<std::string, ObjectConstPtr> sensors_;
 
     void calculateLinkPositions();
 

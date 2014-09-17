@@ -3,6 +3,10 @@
 #include <urdf/model.h>
 #include <kdl_parser/kdl_parser.hpp>
 
+// Sensors
+#include "depth_sensor.h"
+#include "laser_range_finder.h"
+
 // For loading urdf model
 #include <fstream>
 #include <sstream>
@@ -98,13 +102,40 @@ void Robot::configure(tue::Configuration config)
                 }
                 else
                 {
-                    const geo::Pose3D& sensor_pose = it->second;
-                    std::cout << "Sensor " << type << ": " << sensor_pose << std::endl;
+                    ObjectPtr sensor;
+                    if (type == "depth_sensor")
+                    {
+                        sensor = ObjectPtr(new DepthSensor);
+                    }
+                    else if (type == "lrf")
+                    {
+                        sensor = ObjectPtr(new LaserRangeFinder);
+                    }
+                    else
+                    {
+                        config.addError("Unknown sensor type: '" + type +"'.");
+                    }
+
+                    if (sensor)
+                        sensors_[link] = sensor;
                 }
             }
         }
 
         config.endArray();
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void Robot::getSensors(std::vector<ObjectConstPtr>& sensors, std::vector<geo::Pose3D>& poses)
+{
+    calculateLinkPositions();
+
+    for(std::map<std::string, ObjectConstPtr>::const_iterator it = sensors_.begin(); it != sensors_.end(); ++it)
+    {
+        sensors.push_back(it->second);
+        poses.push_back(link_positions_[it->first]);
     }
 }
 

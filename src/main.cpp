@@ -38,6 +38,10 @@ int main(int argc, char **argv)
             }
         }
 
+        // Step the simulator
+        std::vector<sim::ObjectConstPtr> changed_objects;
+        simulator.step(0.01, changed_objects);
+
         usleep(10000);
     }
 

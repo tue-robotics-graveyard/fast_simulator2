@@ -3,7 +3,6 @@
 
 #include "types.h"
 
-#include <map>
 #include <vector>
 
 #include <tue/config/configuration.h>
@@ -30,8 +29,7 @@ private:
 
     RobotPtr robot_;
 
-    std::map<UUID, ObjectConstPtr> objects_;
-
+    WorldPtr world_;
 };
 
 }

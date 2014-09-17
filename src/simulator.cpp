@@ -1,5 +1,6 @@
 #include "simulator.h"
 
+#include "world.h"
 #include "object.h"
 #include "robot.h"
 
@@ -10,7 +11,7 @@ namespace sim
 
 // ----------------------------------------------------------------------------------------------------
 
-Simulator::Simulator()
+Simulator::Simulator() : world_(new World())
 {
 }
 
@@ -84,25 +85,43 @@ void Simulator::configure(tue::Configuration config)
 
 void Simulator::step(double dt, std::vector<ObjectConstPtr>& changed_objects)
 {
-    for(std::map<UUID, ObjectConstPtr>::iterator it = objects_.begin(); it != objects_.end(); ++it)
+    WorldPtr world_updated(new World(*world_));
+
+    for(std::map<UUID, ObjectConstPtr>::const_iterator it = world_->objects.begin(); it != world_->objects.end(); ++it)
     {
         const ObjectConstPtr& obj = it->second;
 
-        ObjectConstPtr obj_update = obj->step(dt);
+        ObjectConstPtr obj_update = obj->step(*world_, dt);
         if (obj_update)
         {
-            it->second = obj_update;
+            world_updated->objects[it->first] = obj_update;
             changed_objects.push_back(obj_update);
         }
     }
 
+    if (robot_)
+    {
+        // Update the robot sensors
+        std::vector<ObjectConstPtr> sensors;
+        std::vector<geo::Pose3D> sensor_poses;
+
+        robot_->getSensors(sensors, sensor_poses);
+
+        for(unsigned int i = 0; i < sensors.size(); ++i)
+        {
+            sensors[i]->sense(*world_, sensor_poses[i]);
+        }
+    }
+
+
+    world_ = world_updated;
 }
 
 // ----------------------------------------------------------------------------------------------------
 
 void Simulator::addObject(const ObjectConstPtr& object)
 {
-    objects_[object->id()] = object;
+    world_->objects[object->id()] = object;
 }
 
 }

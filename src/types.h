@@ -17,6 +17,10 @@ class Robot;
 typedef boost::shared_ptr<Robot> RobotPtr;
 typedef boost::shared_ptr<const Robot> RobotConstPtr;
 
+class World;
+typedef boost::shared_ptr<World> WorldPtr;
+typedef boost::shared_ptr<const World> WorldConstPtr;
+
 }
 
 #endif

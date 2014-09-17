@@ -2,7 +2,7 @@ robot:
     urdf: /home/sdries/ros/hydro/system/src/amigo_description/urdf/amigo.urdf
     pose: {x: 0, y: 0, z: 0}
     sensors:
-        - type: kinect
+        - type: depth_sensor
           link: top_kinect/openni_rgb_optical_frame
         - type: lrf
           link: base_laser
