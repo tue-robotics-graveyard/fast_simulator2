@@ -1,5 +1,7 @@
 #include "simulator_plugin.h"
 
+#include "world.h"
+
 #include <ed/entity.h>
 #include <ed/world_model.h>
 #include <ed/update_request.h>
@@ -15,8 +17,21 @@
 
 // ----------------------------------------------------------------------------------------------------
 
-SimulatorPlugin::SimulatorPlugin()
+void addToUpdateRequest(const sim::ObjectConstPtr& obj, ed::UpdateRequest& req)
 {
+    ed::EntityPtr e(new ed::Entity(obj->id()));
+    e->setPose(obj->pose());
+    e->setType(obj->type());
+    e->setShape(obj->shape());
+
+    req.setEntity(e);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+SimulatorPlugin::SimulatorPlugin() : reconfigured_(false)
+{
+    std::cout << "INIT" << std::endl;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -29,7 +44,8 @@ SimulatorPlugin::~SimulatorPlugin()
 
 void SimulatorPlugin::configure(tue::Configuration config)
 {
-
+    simulator_.configure(config);
+    reconfigured_ = true;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -55,16 +71,26 @@ void SimulatorPlugin::process(const ed::WorldModel& world, ed::UpdateRequest& re
     std::vector<sim::ObjectConstPtr> changed_objects;
     simulator_.step(0.01, changed_objects);
 
-    // Update all changed objects in the world model
-    for(std::vector<sim::ObjectConstPtr>::const_iterator it = changed_objects.begin(); it != changed_objects.end(); ++it)
+    if (reconfigured_)
     {
-        const sim::ObjectConstPtr& obj = *it;
+        // The simulator was reconfigured, so updated all objects
 
-        ed::EntityPtr e(new ed::Entity(obj->id()));
-        e->setPose(obj->pose());
-        e->setShape(obj->shape());
+        // Update ED
+        const std::map<sim::UUID, sim::ObjectConstPtr>& sim_objects = simulator_.world()->objects;
+        for(std::map<sim::UUID, sim::ObjectConstPtr>::const_iterator it = sim_objects.begin(); it != sim_objects.end(); ++it)
+        {
+            addToUpdateRequest(it->second, req);
+        }
 
-        req.setEntity(e);
+        reconfigured_ = false;
+    }
+    else
+    {
+        // Only update all changed objects in the world model
+        for(std::vector<sim::ObjectConstPtr>::const_iterator it = changed_objects.begin(); it != changed_objects.end(); ++it)
+        {
+            addToUpdateRequest(*it, req);
+        }
     }
 }
 

@@ -56,7 +56,6 @@ DepthSensor::~DepthSensor()
 
 void DepthSensor::sense(const World& world, const geo::Pose3D& sensor_pose) const
 {
-
     geo::Pose3D geolib_pose = sensor_pose * geo::Pose3D(0, 0, 0, 3.1415, 0, 0);
 
     cv::Mat depth_image = cv::Mat(height_, width_, CV_32FC1, 0.0);

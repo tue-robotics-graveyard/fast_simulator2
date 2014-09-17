@@ -38,6 +38,9 @@ private:
 
     // Simulator
 
+    /// True if a new configuration was loaded
+    bool reconfigured_;
+
     sim::Simulator simulator_;
 
     // World model update

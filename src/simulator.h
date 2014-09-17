@@ -25,6 +25,8 @@ public:
 
     void addObject(const ObjectConstPtr& object);
 
+    WorldConstPtr world() const { return world_; }
+
 private:
 
     RobotPtr robot_;
