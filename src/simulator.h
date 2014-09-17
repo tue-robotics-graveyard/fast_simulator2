@@ -6,6 +6,8 @@
 #include <map>
 #include <vector>
 
+#include <tue/config/configuration.h>
+
 namespace sim
 {
 
@@ -17,6 +19,8 @@ public:
     Simulator();
 
     virtual ~Simulator();
+
+    void configure(tue::Configuration config);
 
     void step(double dt, std::vector<ObjectConstPtr>& changed_objects);
 

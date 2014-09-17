@@ -62,10 +62,9 @@ add_library(ed_simulator_plugin
 )
 target_link_libraries(ed_simulator_plugin ${catkin_LIBRARIES})
 
-# add_executable(exec_name
-#     src/source_file1.cpp
-#     ...
-# )
-# target_link_libraries(exec_name ${catkin_LIBRARIES})
+add_executable(simulator
+    src/main.cpp
+)
+target_link_libraries(simulator ed_simulator_plugin)
 
 

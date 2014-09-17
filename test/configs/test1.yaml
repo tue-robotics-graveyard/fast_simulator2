@@ -1,0 +1,9 @@
+robot:
+    type: amigo
+    pose: {x: 0, y: 0, z: 0}
+
+objects:
+    - id: table
+      type: kitchen_table
+      pose: {x: 5, y: 0, z: 0}
+

@@ -19,8 +19,13 @@ public:
     virtual ObjectPtr step(double dt) const;
 
     const UUID& id() const { return id_; }
+    const std::string& type() const { return type_; }
     const geo::Pose3D& pose() const { return pose_; }
     geo::ShapeConstPtr shape() const { return shape_; }
+
+    void setPose(const geo::Pose3D& pose) { pose_ = pose; }
+    void setShape(const geo::ShapeConstPtr& shape) { shape_ = shape; }
+    void setType(const std::string& type) { type_ = type; }
 
 private:
 
@@ -28,7 +33,7 @@ private:
 
     std::string type_;
 
-    geo::ShapePtr shape_;
+    geo::ShapeConstPtr shape_;
 
     geo::Pose3D pose_;
 
