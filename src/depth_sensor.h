@@ -3,6 +3,8 @@
 
 #include "object.h"
 
+#include <geolib/sensors/DepthCamera.h>
+
 namespace sim
 {
 
@@ -16,6 +18,12 @@ public:
     virtual ~DepthSensor();
 
     void sense(const World& world, const geo::Pose3D& sensor_pose) const;
+
+private:
+
+    int width_, height_;
+
+    geo::DepthCamera camera_;
 
 };
 

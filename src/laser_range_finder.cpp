@@ -17,7 +17,7 @@ LaserRangeFinder::~LaserRangeFinder()
 
 void LaserRangeFinder::sense(const World& world, const geo::Pose3D& sensor_pose) const
 {
-    std::cout << "LaserRangeFinder: " << sensor_pose << std::endl;
+//    std::cout << "LaserRangeFinder: " << sensor_pose << std::endl;
 
 }
 
