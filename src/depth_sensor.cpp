@@ -7,6 +7,10 @@
 
 #include <opencv2/highgui/highgui.hpp>
 
+// ROS
+#include <rgbd/ros/conversions.h>
+#include <sensor_msgs/Image.h>
+
 namespace sim
 {
 
@@ -42,8 +46,11 @@ DepthSensor::DepthSensor() : width_(640), height_(480)
 {
     // TODO: read from configuration
     camera_.setOpticalTranslation(0, 0);
-    camera_.setOpticalCenter(320, 240);
-    camera_.setFocalLengths(550, 550);
+    camera_.setOpticalCenter(320.5, 240.5);
+    camera_.setFocalLengths(558, 558);
+
+    rgbd::convert(camera_, cam_info_depth_);
+    rgbd::convert(camera_, cam_info_rgb_);
 }
 
 // ----------------------------------------------------------------------------------------------------

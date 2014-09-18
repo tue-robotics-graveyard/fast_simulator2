@@ -5,6 +5,9 @@
 
 #include <geolib/sensors/DepthCamera.h>
 
+// ROS
+#include <sensor_msgs/CameraInfo.h>
+
 namespace sim
 {
 
@@ -24,6 +27,10 @@ private:
     int width_, height_;
 
     geo::DepthCamera camera_;
+
+    // ROS
+    sensor_msgs::CameraInfo cam_info_depth_;
+    sensor_msgs::CameraInfo cam_info_rgb_;
 
 };
 
