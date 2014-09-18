@@ -33,6 +33,7 @@ private:
     std::vector<ros::Publisher> pubs_depth_;
     std::vector<ros::Publisher> pubs_cam_info_rgb_;
     std::vector<ros::Publisher> pubs_cam_info_depth_;
+    std::vector<ros::Publisher> pubs_rgbd_;
 
     std::string rgb_frame_id_, depth_frame_id_;
 
