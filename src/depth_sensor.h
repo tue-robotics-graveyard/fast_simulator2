@@ -20,13 +20,18 @@ public:
 
     virtual ~DepthSensor();
 
+    void configure(tue::Configuration config);
+
     void sense(const World& world, const geo::Pose3D& sensor_pose) const;
 
 private:
 
-    int width_, height_;
+    bool render_rgb_, render_depth_;
 
-    geo::DepthCamera camera_;
+    int rgb_width_, rgb_height_;
+    int depth_width_, depth_height_;
+
+    geo::DepthCamera depth_rasterizer_;
 
     // ROS
     std::vector<ros::Publisher> pubs_rgb_;

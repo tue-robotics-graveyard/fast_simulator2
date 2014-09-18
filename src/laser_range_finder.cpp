@@ -17,6 +17,13 @@ LaserRangeFinder::LaserRangeFinder()
 
 // ----------------------------------------------------------------------------------------------------
 
+void LaserRangeFinder::configure(tue::Configuration config)
+{
+
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 LaserRangeFinder::~LaserRangeFinder()
 {
 }

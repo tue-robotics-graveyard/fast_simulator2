@@ -17,6 +17,8 @@ public:
 
     virtual ~LaserRangeFinder();
 
+    void configure(tue::Configuration config);
+
     void sense(const World& world, const geo::Pose3D& sensor_pose) const;
 
 private:

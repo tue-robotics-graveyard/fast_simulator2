@@ -12,6 +12,21 @@ plugins:
         sensors:
             - type: depth_sensor
               link: top_kinect/openni_rgb_optical_frame
+              parameters:
+                  depth:
+                      width: 640
+                      height: 480
+                      fx: 558
+                      fy: 558
+                  rgb:
+                      width: 640
+                      height: 480
+                  rgb_topic: /amigo/top_kinect/rgb/image_color
+                  rgb_info_topic: /amigo/top_kinect/rgb/camera_info
+                  depth_topic: /amigo/top_kinect/depth_registred/image
+                  depth_info_topic: /amigo/top_kinect/depth_registered/camera_info
+                  rgbd_topic: /amigo/top_kinect/rgbd
+                  frame_id: /amigo/top_kinect/openni_rgb_optical_frame
             - type: lrf
               link: base_laser
             - type: lrf

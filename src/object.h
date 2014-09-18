@@ -5,6 +5,8 @@
 
 #include <geolib/datatypes.h>
 
+#include <tue/config/configuration.h>
+
 namespace sim
 {
 
@@ -20,6 +22,8 @@ public:
 
     // TODO: move this to seperate Sensor class
     virtual void sense(const World& world, const geo::Pose3D& sensor_pose) const {}
+
+    virtual void configure(tue::Configuration config) {}
 
     const UUID& id() const { return id_; }
     const std::string& type() const { return type_; }

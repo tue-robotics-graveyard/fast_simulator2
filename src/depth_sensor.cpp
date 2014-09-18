@@ -49,27 +49,72 @@ protected:
 
 // ----------------------------------------------------------------------------------------------------
 
-DepthSensor::DepthSensor() : width_(640), height_(480)
+DepthSensor::DepthSensor() : render_rgb_(false), render_depth_(false)
 {
-    // TODO: read from configuration
-    camera_.setOpticalTranslation(0, 0);
-    camera_.setOpticalCenter(320.5, 240.5);
-    camera_.setFocalLengths(558, 558);
-
-    ros::NodeHandle nh;
-
-    pubs_rgb_.push_back(nh.advertise<sensor_msgs::Image>("rgb_topic", 10));
-    pubs_depth_.push_back(nh.advertise<sensor_msgs::Image>("depth_topic", 10));
-    pubs_cam_info_rgb_.push_back(nh.advertise<sensor_msgs::CameraInfo>("rgb_info_topic", 10));
-    pubs_cam_info_depth_.push_back(nh.advertise<sensor_msgs::CameraInfo>("depth_info_topic", 10));
-
-    pubs_rgbd_.push_back(nh.advertise<rgbd::RGBDMsg>("rgbd_topic", 10));
 }
 
 // ----------------------------------------------------------------------------------------------------
 
 DepthSensor::~DepthSensor()
 {
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void DepthSensor::configure(tue::Configuration config)
+{
+    if (config.readGroup("rgb"))
+    {
+        config.value("width", rgb_width_);
+        config.value("height", rgb_height_);
+
+        render_rgb_ = true;
+
+        config.endGroup();
+    }
+
+    if (config.readGroup("depth"))
+    {
+        config.value("width", depth_width_);
+        config.value("height", depth_height_);
+
+        double fx, fy;
+        config.value("fx", fx);
+        config.value("fy", fy);
+
+        depth_rasterizer_.setOpticalTranslation(0, 0);
+        depth_rasterizer_.setOpticalCenter((depth_width_ + 1) / 2, (depth_height_ + 1) / 2);
+        depth_rasterizer_.setFocalLengths(fx, fy);
+
+        render_depth_ = true;
+
+        config.endGroup();
+    }
+
+    ros::NodeHandle nh;
+
+    std::string rgbd_topic;
+    if (config.value("rgbd_topic", rgbd_topic, tue::OPTIONAL))
+        pubs_rgbd_.push_back(nh.advertise<rgbd::RGBDMsg>(rgbd_topic, 10));
+
+    std::string depth_topic;
+    if (config.value("depth_topic", depth_topic, tue::OPTIONAL))
+        pubs_depth_.push_back(nh.advertise<sensor_msgs::Image>(depth_topic, 10));
+
+    std::string depth_info_topic;
+    if (config.value("depth_info_topic", depth_info_topic, tue::OPTIONAL))
+        pubs_cam_info_depth_.push_back(nh.advertise<sensor_msgs::CameraInfo>(depth_info_topic, 10));
+
+    std::string rgb_topic;
+    if (config.value("rgb_topic", rgb_topic, tue::OPTIONAL))
+        pubs_rgb_.push_back(nh.advertise<sensor_msgs::Image>(rgb_topic, 10));
+
+    std::string rgb_info_topic;
+    if (config.value("rgb_info_topic", rgb_info_topic, tue::OPTIONAL))
+        pubs_cam_info_rgb_.push_back(nh.advertise<sensor_msgs::CameraInfo>(rgb_info_topic, 10));
+
+    config.value("frame_id", rgb_frame_id_);
+    depth_frame_id_ = rgb_frame_id_;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -82,17 +127,17 @@ void DepthSensor::sense(const World& world, const geo::Pose3D& sensor_pose) cons
     cv::Mat depth_image;
     cv::Mat rgb_image;
 
-    if (!pubs_rgbd_.empty() || !pubs_rgb_.empty())
+    if (render_rgb_)
     {
-        rgb_image = cv::Mat(height_, width_, CV_8UC3, cv::Scalar(255,255,255));
+        rgb_image = cv::Mat(rgb_height_, rgb_width_, CV_8UC3, cv::Scalar(255,255,255));
     }
 
-    if (!pubs_rgbd_.empty() || !pubs_depth_.empty())
+    if (render_depth_)
     {
         // Calculate sensor pose in geolib frame
         geo::Pose3D geolib_pose = sensor_pose * geo::Pose3D(0, 0, 0, 3.1415, 0, 0);
 
-        depth_image = cv::Mat(height_, width_, CV_32FC1, 0.0);
+        depth_image = cv::Mat(depth_height_, depth_width_, CV_32FC1, 0.0);
         for(std::map<UUID, ObjectConstPtr>::const_iterator it = world.objects.begin(); it != world.objects.end(); ++it)
         {
             const ObjectConstPtr& obj = it->second;
@@ -106,10 +151,10 @@ void DepthSensor::sense(const World& world, const geo::Pose3D& sensor_pose) cons
                 // Set render options
                 geo::RenderOptions opt;
                 opt.setMesh(shape->getMesh(), rel_pose);
-                DepthSensorRenderResult res(depth_image, width_, height_);
+                DepthSensorRenderResult res(depth_image, depth_width_, depth_height_);
 
                 // Render
-                camera_.render(opt, res);
+                depth_rasterizer_.render(opt, res);
             }
         }
     }
@@ -131,7 +176,7 @@ void DepthSensor::sense(const World& world, const geo::Pose3D& sensor_pose) cons
     {
         // Convert camera info to ROS message
         sensor_msgs::CameraInfo cam_info_depth;
-        rgbd::convert(camera_, cam_info_depth);
+        rgbd::convert(depth_rasterizer_, cam_info_depth);
         cam_info_depth.header.stamp = time;
         cam_info_depth.header.frame_id = depth_frame_id_;
 
@@ -157,7 +202,7 @@ void DepthSensor::sense(const World& world, const geo::Pose3D& sensor_pose) cons
     {
         // Convert camera info to ROS message
         sensor_msgs::CameraInfo cam_info_rgb;
-        rgbd::convert(camera_, cam_info_rgb);
+        rgbd::convert(depth_rasterizer_, cam_info_rgb);
         cam_info_rgb.header.stamp = time;
         cam_info_rgb.header.frame_id = rgb_frame_id_;
 
@@ -168,14 +213,23 @@ void DepthSensor::sense(const World& world, const geo::Pose3D& sensor_pose) cons
 
     if (!pubs_rgbd_.empty())
     {
-        rgbd::Image image(rgb_image, depth_image, camera_, rgb_frame_id_, time.toSec());
+        rgbd::Image image(rgb_image, depth_image, depth_rasterizer_, rgb_frame_id_, time.toSec());
 
         rgbd::RGBDMsg msg;
         msg.version = 2;
 
+        // Set RGB storage type
+        rgbd::RGBStorageType rgb_type = rgbd::RGB_STORAGE_JPG;
+        if (!rgb_image.data)
+            rgb_type = rgbd::RGB_STORAGE_NONE;
+
+        rgbd::DepthStorageType depth_type = rgbd::DEPTH_STORAGE_PNG;
+        if (!depth_image.data)
+            depth_type = rgbd::DEPTH_STORAGE_NONE;
+
         std::stringstream stream;
         tue::serialization::OutputArchive a(stream);
-        rgbd::serialize(image, a);
+        rgbd::serialize(image, a, rgb_type, depth_type);
         tue::serialization::convert(stream, msg.rgb);
 
         for(std::vector<ros::Publisher>::const_iterator it = pubs_rgbd_.begin(); it != pubs_rgbd_.end(); ++it)

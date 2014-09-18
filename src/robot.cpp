@@ -117,7 +117,15 @@ void Robot::configure(tue::Configuration config)
                     }
 
                     if (sensor)
+                    {
+                        if (config.readGroup("parameters"))
+                        {
+                            sensor->configure(config.limitScope());
+                            config.endGroup();
+                        }
+
                         sensors_[link] = sensor;
+                    }
                 }
             }
         }
