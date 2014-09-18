@@ -6,7 +6,7 @@
 #include <geolib/sensors/DepthCamera.h>
 
 // ROS
-#include <sensor_msgs/CameraInfo.h>
+#include <ros/publisher.h>
 
 namespace sim
 {
@@ -29,8 +29,12 @@ private:
     geo::DepthCamera camera_;
 
     // ROS
-    sensor_msgs::CameraInfo cam_info_depth_;
-    sensor_msgs::CameraInfo cam_info_rgb_;
+    std::vector<ros::Publisher> pubs_rgb_;
+    std::vector<ros::Publisher> pubs_depth_;
+    std::vector<ros::Publisher> pubs_cam_info_rgb_;
+    std::vector<ros::Publisher> pubs_cam_info_depth_;
+
+    std::string rgb_frame_id_, depth_frame_id_;
 
 };
 

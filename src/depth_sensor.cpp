@@ -10,6 +10,8 @@
 // ROS
 #include <rgbd/ros/conversions.h>
 #include <sensor_msgs/Image.h>
+#include <sensor_msgs/CameraInfo.h>
+#include <ros/node_handle.h>
 
 namespace sim
 {
@@ -49,8 +51,12 @@ DepthSensor::DepthSensor() : width_(640), height_(480)
     camera_.setOpticalCenter(320.5, 240.5);
     camera_.setFocalLengths(558, 558);
 
-    rgbd::convert(camera_, cam_info_depth_);
-    rgbd::convert(camera_, cam_info_rgb_);
+    ros::NodeHandle nh;
+
+    pubs_rgb_.push_back(nh.advertise<sensor_msgs::Image>("rgb_topic", 10));
+    pubs_depth_.push_back(nh.advertise<sensor_msgs::Image>("depth_topic", 10));
+    pubs_cam_info_rgb_.push_back(nh.advertise<sensor_msgs::CameraInfo>("rgb_info_topic", 10));
+    pubs_cam_info_depth_.push_back(nh.advertise<sensor_msgs::CameraInfo>("depth_info_topic", 10));
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -63,6 +69,10 @@ DepthSensor::~DepthSensor()
 
 void DepthSensor::sense(const World& world, const geo::Pose3D& sensor_pose) const
 {
+    // Get ROS current time
+    ros::Time time = ros::Time::now();
+
+    // Calculate sensor pose in geolib frame
     geo::Pose3D geolib_pose = sensor_pose * geo::Pose3D(0, 0, 0, 3.1415, 0, 0);
 
     cv::Mat depth_image = cv::Mat(height_, width_, CV_32FC1, 0.0);
@@ -86,8 +96,33 @@ void DepthSensor::sense(const World& world, const geo::Pose3D& sensor_pose) cons
         }
     }
 
-    cv::imshow("depth", depth_image / 8);
-    cv::waitKey(3);
+    // Convert depth image to ROS message
+    sensor_msgs::Image depth_image_msg;
+    rgbd::convert(depth_image, depth_image_msg);
+
+    // Convert camera info to ROS message
+    sensor_msgs::CameraInfo cam_info_depth, cam_info_rgb;
+    rgbd::convert(camera_, cam_info_depth);
+    rgbd::convert(camera_, cam_info_rgb);
+
+    // Set time stamps
+    cam_info_rgb.header.stamp = time;
+    cam_info_depth.header.stamp = time;
+    depth_image_msg.header.stamp = time;
+
+    // Set frame ids
+    cam_info_rgb.header.frame_id = rgb_frame_id_;
+    cam_info_depth.header.frame_id = depth_frame_id_;
+    depth_image_msg.header.frame_id = depth_frame_id_;
+
+    for(std::vector<ros::Publisher>::const_iterator it = pubs_cam_info_rgb_.begin(); it != pubs_cam_info_rgb_.end(); ++it)
+        it->publish(cam_info_rgb);
+
+    for(std::vector<ros::Publisher>::const_iterator it = pubs_cam_info_depth_.begin(); it != pubs_cam_info_depth_.end(); ++it)
+        it->publish(cam_info_depth);
+
+    for(std::vector<ros::Publisher>::const_iterator it = pubs_depth_.begin(); it != pubs_depth_.end(); ++it)
+        it->publish(depth_image_msg);
 }
 
 }
