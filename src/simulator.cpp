@@ -4,7 +4,7 @@
 #include "object.h"
 #include "robot.h"
 
-#include <ed/models/loader.h>
+#include <ed/models/models.h>
 
 namespace sim
 {
@@ -51,14 +51,13 @@ void Simulator::configure(tue::Configuration config)
                 {
                     if (config.value("x", pose.t.x) && config.value("y", pose.t.y) && config.value("z", pose.t.z))
                     {
-                        ed::models::Loader l;
-                        geo::ShapePtr shape = l.loadShape(type);
-                        if (shape)
+                        ed::models::NewEntityConstPtr e_created = ed::models::create(type, tue::Configuration(), id);
+                        if (e_created && e_created->shape)
                         {
                             ObjectPtr obj(new Object(id));
                             obj->setType(type);
                             obj->setPose(pose);
-                            obj->setShape(shape);
+                            obj->setShape(e_created->shape);
 
                             addObject(obj);
                         }

@@ -5,7 +5,7 @@
 #include <ed/entity.h>
 #include <ed/world_model.h>
 #include <ed/update_request.h>
-#include <ed/models/loader.h>
+#include <ed/models/models.h>
 
 #include <ros/node_handle.h>
 #include <ros/advertise_service_options.h>
@@ -100,12 +100,11 @@ bool SimulatorPlugin::srvSetEntity(ed::SetEntity::Request& req, ed::SetEntity::R
 {
     if (req.action == ed::SetEntity::Request::ADD)
     {
-        ed::models::Loader l;
-        geo::ShapePtr shape = l.loadShape(req.type);
-        if (shape)
+        ed::models::NewEntityConstPtr e_created = ed::models::create(req.type, tue::Configuration(), req.id);
+        if (e_created && e_created->shape)
         {
             ed::EntityPtr e(new ed::Entity(req.id, req.type));
-            e->setShape(shape);
+            e->setShape(e_created->shape);
 
             // Set the pose
             geo::Pose3D pose;
