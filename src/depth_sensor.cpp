@@ -91,6 +91,9 @@ void DepthSensor::configure(tue::Configuration config)
         config.endGroup();
     }
 
+    if (!ros::isInitialized())
+         ros::init(ros::M_string(), "simulator", ros::init_options::NoSigintHandler);
+
     ros::NodeHandle nh;
 
     std::string rgbd_topic;

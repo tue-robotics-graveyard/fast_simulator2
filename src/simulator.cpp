@@ -23,6 +23,25 @@ Simulator::~Simulator()
 
 // ----------------------------------------------------------------------------------------------------
 
+void addObjectRecursive(Simulator& sim, const ed::models::NewEntityConstPtr& e, const geo::Pose3D& pose)
+{
+    if (e->shape)
+    {
+        ObjectPtr obj(new Object(e->id));
+        obj->setType(e->id);
+        obj->setPose(pose * e->pose);
+        obj->setShape(e->shape);
+        sim.addObject(obj);
+    }
+
+    for(std::vector<ed::models::NewEntityPtr>::const_iterator it = e->children.begin(); it != e->children.end(); ++it)
+    {
+        addObjectRecursive(sim, *it, pose * e->pose);
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void Simulator::configure(tue::Configuration config)
 {
     if (config.readGroup("robot"))
@@ -51,15 +70,13 @@ void Simulator::configure(tue::Configuration config)
                 {
                     if (config.value("x", pose.t.x) && config.value("y", pose.t.y) && config.value("z", pose.t.z))
                     {
-                        ed::models::NewEntityConstPtr e_created = ed::models::create(type, tue::Configuration(), id);
-                        if (e_created && e_created->shape)
-                        {
-                            ObjectPtr obj(new Object(id));
-                            obj->setType(type);
-                            obj->setPose(pose);
-                            obj->setShape(e_created->shape);
 
-                            addObject(obj);
+//                        std::cout << "Loading" << std::endl;
+                        ed::models::NewEntityConstPtr e_created = ed::models::create(type, tue::Configuration(), id);
+//                        std::cout << "Done" << std::endl;
+                        if (e_created)
+                        {
+                            addObjectRecursive(*this, e_created, pose);
                         }
                         else
                         {
