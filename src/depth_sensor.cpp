@@ -96,25 +96,33 @@ void DepthSensor::configure(tue::Configuration config)
 
     ros::NodeHandle nh;
 
-    std::string rgbd_topic;
-    if (config.value("rgbd_topic", rgbd_topic, tue::OPTIONAL))
-        pubs_rgbd_.push_back(nh.advertise<rgbd::RGBDMsg>(rgbd_topic, 10));
+    if (config.readArray("topics"))
+    {
+        while(config.nextArrayItem())
+        {
+            std::string rgbd_topic;
+            if (config.value("rgbd", rgbd_topic, tue::OPTIONAL))
+                pubs_rgbd_.push_back(nh.advertise<rgbd::RGBDMsg>(rgbd_topic, 10));
 
-    std::string depth_topic;
-    if (config.value("depth_topic", depth_topic, tue::OPTIONAL))
-        pubs_depth_.push_back(nh.advertise<sensor_msgs::Image>(depth_topic, 10));
+            std::string depth_topic;
+            if (config.value("depth", depth_topic, tue::OPTIONAL))
+                pubs_depth_.push_back(nh.advertise<sensor_msgs::Image>(depth_topic, 10));
 
-    std::string depth_info_topic;
-    if (config.value("depth_info_topic", depth_info_topic, tue::OPTIONAL))
-        pubs_cam_info_depth_.push_back(nh.advertise<sensor_msgs::CameraInfo>(depth_info_topic, 10));
+            std::string depth_info_topic;
+            if (config.value("depth_info", depth_info_topic, tue::OPTIONAL))
+                pubs_cam_info_depth_.push_back(nh.advertise<sensor_msgs::CameraInfo>(depth_info_topic, 10));
 
-    std::string rgb_topic;
-    if (config.value("rgb_topic", rgb_topic, tue::OPTIONAL))
-        pubs_rgb_.push_back(nh.advertise<sensor_msgs::Image>(rgb_topic, 10));
+            std::string rgb_topic;
+            if (config.value("rgb", rgb_topic, tue::OPTIONAL))
+                pubs_rgb_.push_back(nh.advertise<sensor_msgs::Image>(rgb_topic, 10));
 
-    std::string rgb_info_topic;
-    if (config.value("rgb_info_topic", rgb_info_topic, tue::OPTIONAL))
-        pubs_cam_info_rgb_.push_back(nh.advertise<sensor_msgs::CameraInfo>(rgb_info_topic, 10));
+            std::string rgb_info_topic;
+            if (config.value("rgb_info", rgb_info_topic, tue::OPTIONAL))
+                pubs_cam_info_rgb_.push_back(nh.advertise<sensor_msgs::CameraInfo>(rgb_info_topic, 10));
+        }
+
+        config.endArray();
+    }
 
     config.value("frame_id", rgb_frame_id_);
     depth_frame_id_ = rgb_frame_id_;
