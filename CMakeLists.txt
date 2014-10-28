@@ -66,6 +66,7 @@ add_library(ed_simulator_plugin
     src/depth_sensor.cpp
     src/laser_range_finder.cpp
     src/world.cpp
+    src/plugin_container.cpp
 )
 target_link_libraries(ed_simulator_plugin ${catkin_LIBRARIES})
 

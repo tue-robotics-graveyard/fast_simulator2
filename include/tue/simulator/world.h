@@ -16,6 +16,15 @@ public:
 
     virtual ~World();
 
+    ObjectConstPtr object(const UUID& id) const
+    {
+        std::map<UUID, ObjectConstPtr>::const_iterator it = objects.find(id);
+        if (it == objects.end())
+            return ObjectConstPtr();
+        else
+            return it->second;
+    }
+
     std::map<UUID, ObjectConstPtr> objects;
 
 };

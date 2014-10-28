@@ -14,6 +14,8 @@ namespace sim
 class Plugin
 {
 
+    friend class PluginContainer;
+
 public:
 
     Plugin();
@@ -24,7 +26,7 @@ public:
 
     virtual void initialize() {}
 
-    virtual void process(const World& world, UpdateRequest& req) {}
+    virtual void process(const World& world, double dt, UpdateRequest& req) {}
 
     const std::string& name() const { return name_; }
 

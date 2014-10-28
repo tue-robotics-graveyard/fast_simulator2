@@ -12,6 +12,10 @@ public:
 
     virtual ~BaseController();
 
+    void configure(tue::Configuration config);
+
+    void process(const sim::World& world, double dt, sim::UpdateRequest& req);
+
 private:
 
 };
