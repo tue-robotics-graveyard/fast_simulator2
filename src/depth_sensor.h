@@ -1,7 +1,7 @@
 #ifndef ED_SIMULATOR_DEPTH_SENSOR_H_
 #define ED_SIMULATOR_DEPTH_SENSOR_H_
 
-#include "object.h"
+#include "tue/simulator/object.h"
 
 #include <geolib/sensors/DepthCamera.h>
 

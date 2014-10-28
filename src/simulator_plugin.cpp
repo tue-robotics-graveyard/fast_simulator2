@@ -1,6 +1,6 @@
 #include "simulator_plugin.h"
 
-#include "world.h"
+#include "tue/simulator/world.h"
 
 #include <ed/entity.h>
 #include <ed/world_model.h>
@@ -13,7 +13,7 @@
 #include <geolib/ros/msg_conversions.h>
 
 // Simulator
-#include "object.h"
+#include "tue/simulator/object.h"
 
 // ----------------------------------------------------------------------------------------------------
 

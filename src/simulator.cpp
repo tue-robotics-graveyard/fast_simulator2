@@ -1,7 +1,7 @@
 #include "simulator.h"
 
-#include "world.h"
-#include "object.h"
+#include "tue/simulator/world.h"
+#include "tue/simulator/object.h"
 #include "robot.h"
 
 #include <ed/models/models.h>

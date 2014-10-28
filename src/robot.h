@@ -3,7 +3,7 @@
 
 #include <tue/config/configuration.h>
 
-#include "types.h"
+#include "tue/simulator/types.h"
 #include <map>
 #include <geolib/datatypes.h>
 

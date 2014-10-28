@@ -1,7 +1,7 @@
 #ifndef ED_SIMULATOR_LASER_RANGE_FINDER_H_
 #define ED_SIMULATOR_LASER_RANGE_FINDER_H_
 
-#include "object.h"
+#include "tue/simulator/object.h"
 
 #include <geolib/sensors/LaserRangeFinder.h>
 

@@ -1,6 +1,6 @@
 #include "depth_sensor.h"
 
-#include "world.h"
+#include "tue/simulator/world.h"
 
 #include <geolib/Shape.h>
 #include <geolib/Box.h>

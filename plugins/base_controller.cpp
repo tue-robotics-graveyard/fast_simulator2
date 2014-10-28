@@ -1,18 +1,14 @@
-#include "tue/simulator/world.h"
-
-namespace sim
-{
+#include "base_controller.h"
 
 // ----------------------------------------------------------------------------------------------------
 
-World::World()
+BaseController::BaseController()
 {
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-World::~World()
+BaseController::~BaseController()
 {
 }
 
-}

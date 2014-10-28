@@ -1,7 +1,7 @@
 #ifndef ED_SIMULATOR_SIMULATOR_H_
 #define ED_SIMULATOR_SIMULATOR_H_
 
-#include "types.h"
+#include "tue/simulator/types.h"
 
 #include <vector>
 

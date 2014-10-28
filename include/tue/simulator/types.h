@@ -21,6 +21,8 @@ class World;
 typedef boost::shared_ptr<World> WorldPtr;
 typedef boost::shared_ptr<const World> WorldConstPtr;
 
+class UpdateRequest;
+
 }
 
 #endif

@@ -1,6 +1,6 @@
 #include "laser_range_finder.h"
 
-#include "world.h"
+#include "tue/simulator/world.h"
 
 namespace sim
 {
