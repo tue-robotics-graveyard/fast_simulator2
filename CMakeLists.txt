@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
     urdf
     kdl_parser
     rgbd
+    class_loader
 )
 
 # find_package(Boost REQUIRED COMPONENTS system program_options)

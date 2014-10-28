@@ -29,6 +29,10 @@ class Plugin;
 typedef boost::shared_ptr<Plugin> PluginPtr;
 typedef boost::shared_ptr<const Plugin> PluginConstPtr;
 
+class PluginContainer;
+typedef boost::shared_ptr<PluginContainer> PluginContainerPtr;
+typedef boost::shared_ptr<const PluginContainer> PluginContainerConstPtr;
+
 }
 
 #endif

@@ -2,8 +2,11 @@
 #define ED_SIMULATOR_PLUGIN_CONTAINER_H_
 
 #include "tue/simulator/types.h"
-
 #include <boost/thread.hpp>
+#include <tue/config/configuration.h>
+#include "tue/simulator/plugin.h"
+
+namespace class_loader { class ClassLoader; }
 
 namespace sim
 {
@@ -17,7 +20,8 @@ public:
 
     virtual ~PluginContainer();
 
-    void setPlugin(PluginPtr plugin, const std::string& name);
+    PluginPtr loadPlugin(const std::string plugin_name, const std::string& lib_filename,
+                    tue::Configuration config, std::string& error);
 
     PluginPtr plugin() const { return plugin_; }
 
@@ -25,7 +29,7 @@ public:
 
     void stop();
 
-    const std::string& name() const { return name_; }
+    const std::string& name() const { return plugin_->name(); }
 
     UpdateRequestConstPtr updateRequest() const
     {
@@ -49,9 +53,9 @@ public:
 
 protected:
 
-    PluginPtr plugin_;
+    class_loader::ClassLoader*  class_loader_;
 
-    std::string name_;
+    PluginPtr plugin_;
 
     bool stop_;
 

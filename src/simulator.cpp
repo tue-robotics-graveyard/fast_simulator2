@@ -4,6 +4,11 @@
 #include "tue/simulator/object.h"
 #include "robot.h"
 
+// Plugin loading
+#include "tue/simulator/plugin.h"
+#include "plugin_container.h"
+#include <tue/filesystem/path.h>
+
 #include <ed/models/models.h>
 
 namespace sim
@@ -19,6 +24,11 @@ Simulator::Simulator() : world_(new World())
 
 Simulator::~Simulator()
 {
+    // Stop all plugins
+    for(std::map<std::string, PluginContainerPtr>::iterator it = plugin_containers_.begin(); it != plugin_containers_.end(); ++it)
+    {
+        it->second.reset();
+    }
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -139,5 +149,45 @@ void Simulator::addObject(const ObjectConstPtr& object)
 {
     world_->objects[object->id()] = object;
 }
+
+// ----------------------------------------------------------------------------------------------------
+
+PluginContainerPtr Simulator::loadPlugin(const std::string plugin_name, const std::string& lib_filename,
+                                         tue::Configuration config, std::string& error)
+{
+    if (lib_filename.empty())
+    {
+        error += "Empty library file given.";
+        return PluginContainerPtr();
+    }
+
+    std::string full_lib_file = lib_filename;
+    //        if (lib_filename[0] != '/')
+    //        {
+    //            // library file is relative
+    //            full_lib_file = getFullLibraryPath(lib_filename);
+    //            if (full_lib_file.empty())
+    //            {
+    //                error += "Could not find plugin '" + lib_filename + "'.";
+    //                return PluginContainerPtr();
+    //            }
+    //        }
+
+    if (!tue::filesystem::Path(full_lib_file).exists())
+    {
+        error += "Could not find plugin '" + full_lib_file + "'.";
+        return PluginContainerPtr();
+    }
+
+    PluginContainerPtr container(new PluginContainer());
+    if (container->loadPlugin(plugin_name, lib_filename, config, error))
+    {
+        plugin_containers_[plugin_name] = container;
+        return container;
+    }
+
+    return PluginContainerPtr();
+}
+
 
 }

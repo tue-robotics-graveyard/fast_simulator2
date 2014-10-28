@@ -18,9 +18,7 @@ class Plugin
 
 public:
 
-    Plugin();
-
-    virtual ~Plugin();
+    Plugin() {}
 
     virtual void configure(tue::Configuration config) {}
 

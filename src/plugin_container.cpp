@@ -1,7 +1,6 @@
 #include "plugin_container.h"
 
 #include "tue/simulator/update_request.h"
-#include "tue/simulator/plugin.h"
 
 #include <ros/rate.h> // TODO: make own implementation
 
@@ -11,7 +10,7 @@ namespace sim
 // --------------------------------------------------------------------------------
 
 PluginContainer::PluginContainer()
-    : cycle_duration_(0.1), loop_frequency_(10), stop_(false), step_finished_(true), t_last_update_(0)
+    : class_loader_(0), cycle_duration_(0.1), loop_frequency_(10), stop_(false), step_finished_(true), t_last_update_(0)
 {
 }
 
@@ -19,24 +18,44 @@ PluginContainer::PluginContainer()
 
 PluginContainer::~PluginContainer()
 {
+    plugin_.reset();
+    delete class_loader_;
 }
 
 // --------------------------------------------------------------------------------
 
-void PluginContainer::setPlugin(PluginPtr plugin, const std::string& name)
-{
-    plugin_ = plugin;
-    name_ = name;
-    plugin_->name_ = name;
+PluginPtr PluginContainer::loadPlugin(const std::string plugin_name, const std::string& lib_filename,
+                tue::Configuration config, std::string& error)
+{    
+    // Load the library
+    delete class_loader_;
+    class_loader_ = new class_loader::ClassLoader(lib_filename);
+
+    // Create plugin
+    class_loader_->loadLibrary();
+    std::vector<std::string> classes = class_loader_->getAvailableClasses<sim::Plugin>();
+
+//    if (classes.empty())
+//    {
+//        error += "Could not find any plugins in '" + class_loader_->getLibraryPath() + "'.";
+//    } else if (classes.size() > 1)
+//    {
+//        error += "Multiple plugins registered in '" + class_loader_->getLibraryPath() + "'.";
+//    } else
+//    {
+//        plugin_ = class_loader_->createInstance<Plugin>(classes.front());
+//        if (plugin_)
+//        {
+//            // Configure plugin
+//            plugin_->configure(config);
+//            plugin_->name_ = plugin_name;
+
+//            return plugin_;
+//        }
+//    }
+
+    return PluginPtr();
 }
-
-// --------------------------------------------------------------------------------
-
-//UpdateRequestConstPtr PluginContainer::getAndClearUpdateRequest() {
-//    UpdateRequestConstPtr ret = update_request_;
-//    update_request_ = UpdateRequestPtr(new UpdateRequest());
-//    return ret;
-//}
 
 // --------------------------------------------------------------------------------
 
@@ -74,7 +93,6 @@ void PluginContainer::step()
         boost::lock_guard<boost::mutex> lg(mutex_world_);
         if (world_new_)
         {
-            // TODO: add mutex
             world_current_ = world_new_;
             world_new_.reset();
         }
