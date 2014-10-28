@@ -35,24 +35,24 @@ PluginPtr PluginContainer::loadPlugin(const std::string plugin_name, const std::
     class_loader_->loadLibrary();
     std::vector<std::string> classes = class_loader_->getAvailableClasses<sim::Plugin>();
 
-//    if (classes.empty())
-//    {
-//        error += "Could not find any plugins in '" + class_loader_->getLibraryPath() + "'.";
-//    } else if (classes.size() > 1)
-//    {
-//        error += "Multiple plugins registered in '" + class_loader_->getLibraryPath() + "'.";
-//    } else
-//    {
-//        plugin_ = class_loader_->createInstance<Plugin>(classes.front());
-//        if (plugin_)
-//        {
-//            // Configure plugin
-//            plugin_->configure(config);
-//            plugin_->name_ = plugin_name;
+    if (classes.empty())
+    {
+        error += "Could not find any plugins in '" + class_loader_->getLibraryPath() + "'.";
+    } else if (classes.size() > 1)
+    {
+        error += "Multiple plugins registered in '" + class_loader_->getLibraryPath() + "'.";
+    } else
+    {
+        plugin_ = class_loader_->createInstance<Plugin>(classes.front());
+        if (plugin_)
+        {
+            // Configure plugin
+            plugin_->configure(config);
+            plugin_->name_ = plugin_name;
 
-//            return plugin_;
-//        }
-//    }
+            return plugin_;
+        }
+    }
 
     return PluginPtr();
 }
