@@ -14,7 +14,7 @@ public:
 
     void configure(tue::Configuration config);
 
-    void process(const sim::World& world, double dt, sim::UpdateRequest& req);
+    void process(const sim::World& world, const sim::Object& obj, double dt, sim::UpdateRequest& req);
 
 private:
 

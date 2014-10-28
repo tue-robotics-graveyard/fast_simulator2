@@ -25,15 +25,11 @@ void BaseController::configure(tue::Configuration config)
 
 // ----------------------------------------------------------------------------------------------------
 
-void BaseController::process(const sim::World& world, double dt, sim::UpdateRequest& req)
+void BaseController::process(const sim::World& world, const sim::Object& obj, double dt, sim::UpdateRequest& req)
 {
-    sim::ObjectConstPtr base = world.object("amigo");
-
-    std::cout << world.objects.size() << std::endl;
-
-    if (base)
-        std::cout << base->pose() << std::endl;
     std::cout << "BaseController::process" << std::endl;
+
+    std::cout << obj.id() << ": " << obj.pose() << std::endl;
 }
 
 SIM_REGISTER_PLUGIN(BaseController)

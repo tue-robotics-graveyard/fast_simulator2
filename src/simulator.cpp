@@ -93,41 +93,40 @@ void Simulator::configure(tue::Configuration config)
                             config.addError("Unknown object type: '" + type + "'.");
                         }
                     }
-
                     config.endGroup();
                 }
                 else
                 {
                     config.addError("Object does not contain pose");
                 }
-            }
-        }
 
-        config.endArray();
-    }
+                if (config.readArray("plugins"))
+                {
+                    while (config.nextArrayItem())
+                    {
+                        std::string name, lib_filename;
+                        if (config.value("name", name) & config.value("lib", lib_filename))
+                        {
+                            tue::Configuration plugin_cfg;
+                            plugin_cfg.setValue("_object", id);
 
-    if (config.readArray("plugins"))
-    {
-        while (config.nextArrayItem())
-        {
-            std::string name, lib_filename;
-            if (config.value("name", name) & config.value("lib", lib_filename))
-            {
-                std::string load_error;
-                if (config.readGroup("parameters"))
-                {
-                    loadPlugin(name, lib_filename, config, load_error);
-                    config.endGroup();
-                }
-                else
-                {
-                    // Load with no parameters
-                    loadPlugin(name, lib_filename, tue::Configuration(), load_error);
-                }
+                            if (config.readGroup("parameters"))
+                            {
+                                plugin_cfg.add(config);
+                                config.endGroup();
+                            }
 
-                if (!load_error.empty())
-                {
-                    config.addError(load_error);
+                            // Load with no parameters
+                            std::string load_error;
+                            loadPlugin(name, lib_filename, plugin_cfg, load_error);
+
+                            if (!load_error.empty())
+                            {
+                                config.addError(load_error);
+                            }
+                        }
+                    }
+                    config.endArray();
                 }
             }
         }

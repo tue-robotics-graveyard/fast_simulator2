@@ -1,6 +1,8 @@
 #include "plugin_container.h"
 
 #include "tue/simulator/update_request.h"
+#include "tue/simulator/world.h"
+
 
 #include <ros/rate.h> // TODO: make own implementation
 
@@ -49,6 +51,8 @@ PluginPtr PluginContainer::loadPlugin(const std::string plugin_name, const std::
             // Configure plugin
             plugin_->configure(config);
             plugin_->name_ = plugin_name;
+
+            config.value("_object", object_id_, tue::OPTIONAL);
 
             return plugin_;
         }
@@ -102,7 +106,14 @@ void PluginContainer::step()
     {
         UpdateRequestPtr update_request(new UpdateRequest);
 
+        ObjectConstPtr obj;
+        if (!object_id_.empty())
+            obj = world_current_->object(object_id_);
+
         plugin_->process(*world_current_, cycle_duration_, *update_request);
+
+        if (obj)
+            plugin_->process(*world_current_, *obj, cycle_duration_, *update_request);
 
         // If the received update_request was not empty, set it
         if (!update_request->empty())
