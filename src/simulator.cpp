@@ -105,6 +105,35 @@ void Simulator::configure(tue::Configuration config)
 
         config.endArray();
     }
+
+    if (config.readArray("plugins"))
+    {
+        while (config.nextArrayItem())
+        {
+            std::string name, lib_filename;
+            if (config.value("name", name) & config.value("lib", lib_filename))
+            {
+                std::string load_error;
+                if (config.readGroup("parameters"))
+                {
+                    loadPlugin(name, lib_filename, config, load_error);
+                    config.endGroup();
+                }
+                else
+                {
+                    // Load with no parameters
+                    loadPlugin(name, lib_filename, tue::Configuration(), load_error);
+                }
+
+                if (!load_error.empty())
+                {
+                    config.addError(load_error);
+                }
+            }
+        }
+
+        config.endArray();
+    }
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -139,8 +168,36 @@ void Simulator::step(double dt, std::vector<ObjectConstPtr>& changed_objects)
         }
     }
 
-
     world_ = world_updated;
+
+    // - - - - - - - - - - - - - - -
+
+    // collect all update requests
+    std::vector<PluginContainerPtr> plugins_with_requests;
+    for(std::map<std::string, PluginContainerPtr>::iterator it = plugin_containers_.begin(); it != plugin_containers_.end(); ++it)
+    {
+        const PluginContainerPtr& c = it->second;
+
+        if (c->updateRequest())
+        {
+//            update(*c->updateRequest());
+            plugins_with_requests.push_back(c);
+        }
+    }
+
+    // Set the new (updated) world
+    for(std::map<std::string, PluginContainerPtr>::iterator it = plugin_containers_.begin(); it != plugin_containers_.end(); ++it)
+    {
+        const PluginContainerPtr& c = it->second;
+        c->setWorld(world_);
+    }
+
+    // Clear the requests of all plugins that had requests (which flags them to continue processing)
+    for(std::vector<PluginContainerPtr>::iterator it = plugins_with_requests.begin(); it != plugins_with_requests.end(); ++it)
+    {
+        PluginContainerPtr c = *it;
+        c->clearUpdateRequest();
+    }
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -183,6 +240,7 @@ PluginContainerPtr Simulator::loadPlugin(const std::string plugin_name, const st
     if (container->loadPlugin(plugin_name, lib_filename, config, error))
     {
         plugin_containers_[plugin_name] = container;
+        container->runThreaded();
         return container;
     }
 

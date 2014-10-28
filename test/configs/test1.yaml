@@ -1,3 +1,7 @@
+plugins:
+    - name: amigo_base_controller
+      lib: /home/sdries/ros/hydro/dev/devel/lib/libsim_base_controller.so
+
 robot:
     urdf: /home/sdries/ros/hydro/system/src/amigo_description/urdf/amigo.urdf
     pose: {x: 0, y: 0, z: 0}   # Does not yet work
