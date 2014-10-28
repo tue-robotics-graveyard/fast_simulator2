@@ -41,6 +41,9 @@ private:
     std::vector<std::string> plugin_paths_;
     std::map<std::string, PluginContainerPtr> plugin_containers_;
 
+    // Models
+    std::map<std::string, std::string> models_;
+
 };
 
 }

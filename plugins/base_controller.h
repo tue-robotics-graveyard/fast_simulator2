@@ -10,8 +10,6 @@ public:
 
     BaseController();
 
-    virtual ~BaseController();
-
     void configure(tue::Configuration config);
 
     void process(const sim::World& world, const sim::Object& obj, double dt, sim::UpdateRequest& req);

@@ -9,6 +9,9 @@
 #include "plugin_container.h"
 #include <tue/filesystem/path.h>
 
+// Object creation
+#include <tue/config/loaders/yaml.h>
+
 #include <ed/models/models.h>
 
 namespace sim
@@ -52,6 +55,93 @@ void addObjectRecursive(Simulator& sim, const ed::models::NewEntityConstPtr& e, 
 
 // ----------------------------------------------------------------------------------------------------
 
+
+tue::Configuration expandObjectConfig(const std::map<std::string, std::string>& models, tue::Configuration config)
+{
+    std::string type;
+    if (config.value("type", type, tue::OPTIONAL))
+    {
+        std::map<std::string, std::string>::const_iterator it = models.find(type);
+        if (it != models.end())
+        {
+            tue::Configuration cfg;
+            tue::config::loadFromYAMLString(it->second, cfg);
+            cfg.add(config);
+
+            return cfg;
+        }
+        else
+        {
+            config.addError("Unknown object type: '" + type + "'.");
+        }
+    }
+    else
+    {
+        return config;
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void createObject(Simulator& sim, const std::map<std::string, std::string>& models,
+                  const std::string& id, const std::string& type,
+                  const geo::Pose3D& pose, tue::Configuration config)
+{
+    // Try own models first
+    std::map<std::string, std::string>::const_iterator it = models.find(type);
+    if (it != models.end())
+    {
+        tue::Configuration cfg = expandObjectConfig(models, config);
+        std::cout << cfg << std::endl;
+
+        //  Composition
+        if (cfg.readArray("children"))
+        {
+            while(cfg.nextArrayItem())
+            {
+                std::string child_id, child_type;
+                if (config.value("id", child_id) && config.value("type", child_type))
+                {
+                    createObject(sim, models, child_id, child_type, geo::Pose3D(), cfg);
+                }
+            }
+            cfg.endArray();
+        }
+
+//        ObjectPtr e;
+//        std::string type;
+//        if (cfg.value("type", type, tue::OPTIONAL))
+//        {
+//            e = createObject(sim, models, id, type, pose, config);
+//        }
+//        else
+//        {
+//            e = ObjectPtr(new Object(id));
+//            e->setType(type);
+//            e->setPose(pose);
+//            sim.addObject(e);
+//        }
+
+//        return e;
+    }
+    else // Try the ED database
+    {
+        ed::models::NewEntityConstPtr e = ed::models::create(type, config, id);
+        if (e)
+        {
+            addObjectRecursive(sim, e, pose);
+        }
+        else
+        {
+            config.addError("Unknown object type: '" + type + "'.");
+        }
+    }
+
+//    return ObjectPtr();
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void Simulator::configure(tue::Configuration config)
 {
     if (config.readGroup("robot"))
@@ -67,6 +157,19 @@ void Simulator::configure(tue::Configuration config)
         config.endGroup();
     }
 
+    if (config.readArray("models"))
+    {
+        while (config.nextArrayItem())
+        {
+            std::string name;
+            if (config.value("name", name))
+            {
+                models_[name] = config.toYAMLString();
+            }
+        }
+        config.endArray();
+    }
+
     if (config.readArray("objects"))
     {
         while (config.nextArrayItem())
@@ -78,27 +181,18 @@ void Simulator::configure(tue::Configuration config)
 
                 if (config.readGroup("pose"))
                 {
-                    if (config.value("x", pose.t.x) && config.value("y", pose.t.y) && config.value("z", pose.t.z))
-                    {
-
-//                        std::cout << "Loading" << std::endl;
-                        ed::models::NewEntityConstPtr e_created = ed::models::create(type, tue::Configuration(), id);
-//                        std::cout << "Done" << std::endl;
-                        if (e_created)
-                        {
-                            addObjectRecursive(*this, e_created, pose);
-                        }
-                        else
-                        {
-                            config.addError("Unknown object type: '" + type + "'.");
-                        }
-                    }
+                    config.value("x", pose.t.x);
+                    config.value("y", pose.t.y);
+                    config.value("z", pose.t.z);
                     config.endGroup();
                 }
                 else
                 {
                     config.addError("Object does not contain pose");
                 }
+
+                if (!config.hasError())
+                    createObject(*this, models_, id, type, pose, config);
 
                 if (config.readArray("plugins"))
                 {
