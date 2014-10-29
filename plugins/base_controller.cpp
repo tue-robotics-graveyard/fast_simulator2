@@ -25,7 +25,7 @@ void BaseController::process(const sim::World& world, const sim::Object& obj, do
 
     std::cout << obj.id() << ": " << obj.pose() << std::endl;
 
-    req.setPose(obj.id(), geo::Pose3D::identity());
+//    req.setPose(obj.id(), geo::Pose3D::identity());
 }
 
 SIM_REGISTER_PLUGIN(BaseController)

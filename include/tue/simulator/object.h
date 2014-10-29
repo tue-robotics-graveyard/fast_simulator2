@@ -47,6 +47,8 @@ private:
     bool moving_;
     geo::Pose3D abs_velocity_;
 
+    std::map<UUID, Joint> joints_;
+
 };
 
 }

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <boost/shared_ptr.hpp>
+#include <geolib/datatypes.h>
 
 namespace sim
 {
@@ -39,6 +40,16 @@ struct ObjectId
 
     UUID id;
     mutable int index;
+};
+
+struct Joint
+{
+    Joint() {}
+
+    Joint(const ObjectId& child_, const geo::Pose3D& pose_) : child(child_), pose(pose_) {}
+
+    ObjectId child;
+    geo::Pose3D pose;
 };
 
 }
