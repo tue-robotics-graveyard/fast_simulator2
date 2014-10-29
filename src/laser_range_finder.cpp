@@ -31,9 +31,9 @@ LaserRangeFinder::~LaserRangeFinder()
 void LaserRangeFinder::sense(const World& world, const geo::Pose3D& sensor_pose) const
 {
     std::vector<double> ranges;
-    for(std::map<UUID, ObjectConstPtr>::const_iterator it = world.objects.begin(); it != world.objects.end(); ++it)
+    for(std::vector<ObjectConstPtr>::const_iterator it = world.objects().begin(); it != world.objects().end(); ++it)
     {
-        const ObjectConstPtr& obj = it->second;
+        const ObjectConstPtr& obj = *it;
         geo::ShapeConstPtr shape = obj->shape();
 
         if (shape)

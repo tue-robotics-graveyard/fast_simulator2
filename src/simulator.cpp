@@ -233,19 +233,19 @@ void Simulator::configure(tue::Configuration config)
 
 void Simulator::step(double dt, std::vector<ObjectConstPtr>& changed_objects)
 {
-    WorldPtr world_updated(new World(*world_));
+//    WorldPtr world_updated(new World(*world_));
 
-    for(std::map<UUID, ObjectConstPtr>::const_iterator it = world_->objects.begin(); it != world_->objects.end(); ++it)
-    {
-        const ObjectConstPtr& obj = it->second;
+//    for(std::map<UUID, ObjectConstPtr>::const_iterator it = world_->objects.begin(); it != world_->objects.end(); ++it)
+//    {
+//        const ObjectConstPtr& obj = it->second;
 
-        ObjectConstPtr obj_update = obj->step(*world_, dt);
-        if (obj_update)
-        {
-            world_updated->objects[it->first] = obj_update;
-            changed_objects.push_back(obj_update);
-        }
-    }
+//        ObjectConstPtr obj_update = obj->step(*world_, dt);
+//        if (obj_update)
+//        {
+//            world_updated->objects[it->first] = obj_update;
+//            changed_objects.push_back(obj_update);
+//        }
+//    }
 
     if (robot_)
     {
@@ -261,7 +261,7 @@ void Simulator::step(double dt, std::vector<ObjectConstPtr>& changed_objects)
         }
     }
 
-    world_ = world_updated;
+//    world_ = world_updated;
 
     // - - - - - - - - - - - - - - -
 
@@ -297,7 +297,7 @@ void Simulator::step(double dt, std::vector<ObjectConstPtr>& changed_objects)
 
 void Simulator::addObject(const ObjectConstPtr& object)
 {
-    world_->objects[object->id()] = object;
+    world_->addObject(object);
 }
 
 // ----------------------------------------------------------------------------------------------------

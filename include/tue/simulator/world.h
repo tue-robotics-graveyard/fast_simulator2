@@ -3,6 +3,7 @@
 
 #include "types.h"
 #include <map>
+#include <vector>
 
 namespace sim
 {
@@ -16,16 +17,21 @@ public:
 
     virtual ~World();
 
-    ObjectConstPtr object(const UUID& id) const
-    {
-        std::map<UUID, ObjectConstPtr>::const_iterator it = objects.find(id);
-        if (it == objects.end())
-            return ObjectConstPtr();
-        else
-            return it->second;
-    }
+    ObjectId addObject(const ObjectConstPtr& obj);
 
-    std::map<UUID, ObjectConstPtr> objects;
+    bool removeObject(const ObjectId& id);
+
+    ObjectConstPtr object(const ObjectId& id) const;
+
+    inline const std::vector<ObjectConstPtr>& objects() const { return objects_; }
+
+private:
+
+    std::vector<ObjectConstPtr> objects_;
+
+    std::map<UUID, unsigned int> id_to_index_;
+
+    int getIndex(const ObjectId& id) const;
 
 };
 

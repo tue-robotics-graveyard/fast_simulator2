@@ -52,7 +52,7 @@ PluginPtr PluginContainer::loadPlugin(const std::string plugin_name, const std::
             plugin_->configure(config);
             plugin_->name_ = plugin_name;
 
-            config.value("_object", object_id_, tue::OPTIONAL);
+            config.value("_object", object_id_.id, tue::OPTIONAL);
 
             return plugin_;
         }
@@ -106,8 +106,10 @@ void PluginContainer::step()
     {
         UpdateRequestPtr update_request(new UpdateRequest);
 
+        std::cout << object_id_.index << std::endl;
+
         ObjectConstPtr obj;
-        if (!object_id_.empty())
+        if (!object_id_.id.empty())
             obj = world_current_->object(object_id_);
 
         plugin_->process(*world_current_, cycle_duration_, *update_request);

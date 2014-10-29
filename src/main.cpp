@@ -10,18 +10,22 @@ int main(int argc, char **argv)
 
     tue::Configuration config;
 
+    std::string config_filename;
     if (argc == 2)
-    {
-        // Load the YAML config file
-        config.loadFromYAMLFile(argv[1]);
-        simulator.configure(config);
+        config_filename = argv[1];
+    else
+        config_filename = "/home/sdries/ros/hydro/dev/src/ed_simulator/test/configs/test1.yaml";
 
-        if (config.hasError())
-        {
-            std::cout << config.error() << std::endl;
-            return 1;
-        }
+    // Load the YAML config file
+    config.loadFromYAMLFile(config_filename);
+    simulator.configure(config);
+
+    if (config.hasError())
+    {
+        std::cout << config.error() << std::endl;
+        return 1;
     }
+
 
     while(true)
     {

@@ -33,6 +33,14 @@ class PluginContainer;
 typedef boost::shared_ptr<PluginContainer> PluginContainerPtr;
 typedef boost::shared_ptr<const PluginContainer> PluginContainerConstPtr;
 
+struct ObjectId
+{
+    ObjectId(const UUID& id_ = "", int index_ = -1) : id(id_), index(index_) {}
+
+    UUID id;
+    mutable int index;
+};
+
 }
 
 #endif

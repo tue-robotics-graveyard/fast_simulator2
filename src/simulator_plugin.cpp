@@ -75,12 +75,12 @@ void SimulatorPlugin::process(const ed::WorldModel& world, ed::UpdateRequest& re
     {
         // The simulator was reconfigured, so updated all objects
 
-        // Update ED
-        const std::map<sim::UUID, sim::ObjectConstPtr>& sim_objects = simulator_.world()->objects;
-        for(std::map<sim::UUID, sim::ObjectConstPtr>::const_iterator it = sim_objects.begin(); it != sim_objects.end(); ++it)
-        {
-            addToUpdateRequest(it->second, req);
-        }
+        // Update ED (TODO)
+//        const std::map<sim::UUID, sim::ObjectConstPtr>& sim_objects = simulator_.world()->objects;
+//        for(std::map<sim::UUID, sim::ObjectConstPtr>::const_iterator it = sim_objects.begin(); it != sim_objects.end(); ++it)
+//        {
+//            addToUpdateRequest(it->second, req);
+//        }
 
         reconfigured_ = false;
     }

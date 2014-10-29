@@ -149,9 +149,9 @@ void DepthSensor::sense(const World& world, const geo::Pose3D& sensor_pose) cons
         geo::Pose3D geolib_pose = sensor_pose * geo::Pose3D(0, 0, 0, 3.1415, 0, 0);
 
         depth_image = cv::Mat(depth_height_, depth_width_, CV_32FC1, 0.0);
-        for(std::map<UUID, ObjectConstPtr>::const_iterator it = world.objects.begin(); it != world.objects.end(); ++it)
+        for(std::vector<ObjectConstPtr>::const_iterator it = world.objects().begin(); it != world.objects().end(); ++it)
         {
-            const ObjectConstPtr& obj = it->second;
+            const ObjectConstPtr& obj = *it;
             geo::ShapeConstPtr shape = obj->shape();
 
             if (shape)
