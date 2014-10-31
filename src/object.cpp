@@ -5,7 +5,7 @@ namespace sim
 
 // ----------------------------------------------------------------------------------------------------
 
-Object::Object(const UUID& id)
+Object::Object(const UUId& id)
     : id_(id), moving_(false), abs_velocity_(geo::Pose3D::identity())
 {
 

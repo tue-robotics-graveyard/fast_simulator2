@@ -15,7 +15,7 @@ class Object
 
 public:
 
-    Object(const UUID& id = "");
+    Object(const UUId& id = "");
 
     /// Returns an updated version of this object. Returns null pointer if object did not change.
     virtual ObjectPtr step(const World& world, double dt) const;
@@ -25,7 +25,7 @@ public:
 
     virtual void configure(tue::Configuration config) {}
 
-    const UUID& id() const { return id_; }
+    const UUId& id() const { return id_; }
     const std::string& type() const { return type_; }
     const geo::Pose3D& pose() const { return pose_; }
     geo::ShapeConstPtr shape() const { return shape_; }
@@ -36,7 +36,7 @@ public:
 
 private:
 
-    UUID id_;
+    UUId id_;
 
     std::string type_;
 
@@ -47,7 +47,7 @@ private:
     bool moving_;
     geo::Pose3D abs_velocity_;
 
-    std::map<UUID, Joint> joints_;
+    std::map<UUId, Joint> joints_;
 
 };
 

@@ -17,12 +17,12 @@ public:
 
     bool empty() const { return poses.empty(); }
 
-    void setPose(const ObjectId& parent, const ObjectId& child, const geo::Pose3D& pose)
+    void setPose(const LUId& parent, const LUId& child, const geo::Pose3D& pose)
     {
-        poses.push_back(std::pair<ObjectId, Joint>(parent, Joint(child, pose)));
+        poses.push_back(std::pair<LUId, Joint>(parent, Joint(child, pose)));
     }
 
-    std::vector<std::pair<ObjectId, Joint> > poses;
+    std::vector<std::pair<LUId, Joint> > poses;
 
 };
 

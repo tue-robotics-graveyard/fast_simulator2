@@ -81,7 +81,7 @@ protected:
     WorldConstPtr world_current_;
 
     // The object this plugin is attached to. Empty is not attached.
-    ObjectId object_id_;
+    LUId object_id_;
 
     void step();
 

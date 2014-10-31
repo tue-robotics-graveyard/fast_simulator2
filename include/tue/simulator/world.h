@@ -1,9 +1,8 @@
 #ifndef ED_SIMULATOR_WORLD_H_
 #define ED_SIMULATOR_WORLD_H_
 
-#include "types.h"
-#include <map>
-#include <vector>
+#include "object.h"
+#include "id_map.h"
 
 namespace sim
 {
@@ -17,21 +16,17 @@ public:
 
     virtual ~World();
 
-    ObjectId addObject(const ObjectConstPtr& obj);
+    inline LUId addObject(const ObjectConstPtr& obj) { return objects_.add(obj->id(), obj); }
 
-    bool removeObject(const ObjectId& id);
+    inline bool removeObject(const LUId& id) { return objects_.remove(id); }
 
-    ObjectConstPtr object(const ObjectId& id) const;
+    inline ObjectConstPtr object(const LUId& id) const { return objects_.get(id); }
 
-    inline const std::vector<ObjectConstPtr>& objects() const { return objects_; }
+    inline const std::vector<ObjectConstPtr>& objects() const { return objects_.getAll(); }
 
 private:
 
-    std::vector<ObjectConstPtr> objects_;
-
-    std::map<UUID, unsigned int> id_to_index_;
-
-    int getIndex(const ObjectId& id) const;
+    IDMap<ObjectConstPtr> objects_;
 
 };
 
