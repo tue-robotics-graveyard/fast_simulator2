@@ -16,7 +16,7 @@ public:
 
     virtual ~World();
 
-    inline LUId addObject(const ObjectConstPtr& obj) { return objects_.add(obj->id(), obj); }
+    inline LUId addObject(const ObjectConstPtr& obj) { return objects_.add(obj); }
 
     inline bool removeObject(const LUId& id) { return objects_.remove(id); }
 
@@ -24,9 +24,15 @@ public:
 
     inline const std::vector<ObjectConstPtr>& objects() const { return objects_.getAll(); }
 
+    LUId addTransform(const TransformConstPtr& t);
+
+    bool getTransform(const LUId& source, const LUId& target) const;
+
 private:
 
     IDMap<ObjectConstPtr> objects_;
+
+    IDMap<TransformConstPtr> transforms_;
 
 };
 

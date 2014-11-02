@@ -4,8 +4,15 @@
 
 #include <iostream>
 
+#include <tue/simulator/id_map.h>
+#include <tue/simulator/object.h>
+#include <sstream>
+
+#include <tue/profiling/timer.h>
+
 int main(int argc, char **argv)
 {
+
     sim::Simulator simulator;
 
     tue::Configuration config;

@@ -26,14 +26,14 @@ public:
 
     // ----------------------------------------------------------------------------------------------------
 
-    inline LUId add(const UUId& uuid, const T& obj)
+    inline LUId add(const T& obj)
     {
         std::map<UUId, unsigned int>::const_iterator it = id_to_index_.find(obj->id());
         if (it == id_to_index_.end())
         {
             id_to_index_[obj->id()] = objects_.size();
             objects_.push_back(obj);
-            return LUId(uuid, objects_.size() - 1);
+            return LUId(obj->id(), objects_.size() - 1);
         }
         else
         {

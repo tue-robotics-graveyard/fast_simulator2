@@ -47,7 +47,8 @@ private:
     bool moving_;
     geo::Pose3D abs_velocity_;
 
-    std::map<UUId, Joint> joints_;
+    std::map<LUId, LUId> transforms_;
+    LUId parent_;
 
 };
 

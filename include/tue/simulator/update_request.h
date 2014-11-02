@@ -19,10 +19,10 @@ public:
 
     void setPose(const LUId& parent, const LUId& child, const geo::Pose3D& pose)
     {
-        poses.push_back(std::pair<LUId, Joint>(parent, Joint(child, pose)));
+        poses.push_back(boost::make_shared<Transform>(parent, child, pose));
     }
 
-    std::vector<std::pair<LUId, Joint> > poses;
+    std::vector<TransformConstPtr> poses;
 
 };
 

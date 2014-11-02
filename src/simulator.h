@@ -31,11 +31,13 @@ public:
 
     WorldConstPtr world() const { return world_; }
 
+    void update(const UpdateRequest& req);
+
 private:
 
     RobotPtr robot_;
 
-    WorldPtr world_;
+    WorldConstPtr world_;
 
     //! Plugins
     std::vector<std::string> plugin_paths_;

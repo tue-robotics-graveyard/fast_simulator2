@@ -2,6 +2,7 @@
 
 #include "tue/simulator/world.h"
 #include "tue/simulator/object.h"
+#include "tue/simulator/update_request.h"
 #include "robot.h"
 
 // Plugin loading
@@ -273,7 +274,7 @@ void Simulator::step(double dt, std::vector<ObjectConstPtr>& changed_objects)
 
         if (c->updateRequest())
         {
-//            update(*c->updateRequest());
+            update(*c->updateRequest());
             plugins_with_requests.push_back(c);
         }
     }
@@ -295,9 +296,23 @@ void Simulator::step(double dt, std::vector<ObjectConstPtr>& changed_objects)
 
 // ----------------------------------------------------------------------------------------------------
 
+void Simulator::update(const UpdateRequest& req)
+{
+    WorldPtr world_updated(new World(*world_));
+
+    // Add transforms
+    for(std::vector<TransformConstPtr>::const_iterator it = req.poses.begin(); it != req.poses.end(); ++it)
+    {
+        world_updated->addTransform(*it);
+    }
+//    req.poses
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void Simulator::addObject(const ObjectConstPtr& object)
 {
-    world_->addObject(object);
+//    world_->addObject(object);
 }
 
 // ----------------------------------------------------------------------------------------------------

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 #include <geolib/datatypes.h>
 
 namespace sim
@@ -42,15 +43,29 @@ struct LUId
     mutable int index;
 };
 
-struct Joint
+struct Transform
 {
-    Joint() {}
+    Transform() {}
 
-    Joint(const LUId& child_, const geo::Pose3D& pose_) : child(child_), pose(pose_) {}
+    Transform(const LUId& parent_, const LUId& child_, const geo::Pose3D& pose_)
+        : parent(parent_), child(child_), pose(pose_)
+    {
+        // TODO: better id generation
+        id_ = parent.id + "-" + child.id;
+    }
 
+    const UUId& id() const { return id_; }
+
+    LUId parent;
     LUId child;
     geo::Pose3D pose;
+
+private:
+
+    UUId id_;
 };
+typedef boost::shared_ptr<Transform> TransformPtr;
+typedef boost::shared_ptr<const Transform> TransformConstPtr;
 
 }
 
