@@ -21,17 +21,12 @@ void BaseController::configure(tue::Configuration config)
 
 void BaseController::process(const sim::World& world, const sim::Object& obj, double dt, sim::UpdateRequest& req)
 {
-    std::cout << "BaseController::process" << std::endl;
+    std::cout << "BaseController::process (" << obj.id() << ")" << std::endl;
 
-    const sim::ObjectConstPtr& o1 = world.object(sim::LUId("world"));
-    const sim::ObjectConstPtr& o2 = world.object(sim::LUId("walls"));
-    if (o1 && o2)
+    geo::Pose3D t;
+    if (world.getTransform(obj.id(), sim::LUId("world"), t))
     {
-        geo::Pose3D t;
-        if (world.getTransform(sim::LUId("world"), sim::LUId("walls"), t))
-        {
-            std::cout << t << std::endl;
-        }
+        std::cout << t << std::endl;
     }
 
 //    std::cout << obj.id() << ": " << obj.pose() << std::endl;

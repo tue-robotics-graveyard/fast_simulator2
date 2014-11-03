@@ -35,11 +35,16 @@ public:
     // TRANSFORMS
 
     const LUId& parent() const { return parent_; }
+    const LUId& parentTransform() const { return parent_transform_; }
+
     bool getDirectTransform(const LUId& child_id, LUId& transform_id) const;
 
     void addTransform(const LUId& child_id, const LUId& transform_id) { transforms_[child_id] = transform_id; }
-    void setParent(const LUId& parent_id) { parent_ = parent_id; }
-
+    void setParent(const LUId& parent_id, const LUId& parent_transform_id)
+    {
+        parent_ = parent_id;
+        parent_transform_ = parent_transform_id;
+    }
 
 private:
 
@@ -49,11 +54,11 @@ private:
 
     geo::ShapeConstPtr shape_;
 
-//    bool moving_;
-//    geo::Pose3D abs_velocity_;
+    // TRANSFORMS
 
     std::map<LUId, LUId> transforms_;
     LUId parent_;
+    LUId parent_transform_;
 
 };
 

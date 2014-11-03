@@ -42,16 +42,17 @@ void World::update(const UpdateRequest& req)
 
         if (parent && child)
         {
+            LUId transform_id = addTransform(t);
+
             ObjectPtr parent_new = boost::make_shared<Object>(*parent);
             ObjectPtr child_new = boost::make_shared<Object>(*child);
 
-            parent_new->addTransform(child_id, t->id());
-            child_new->setParent(parent_id);
+            parent_new->addTransform(child_id, transform_id);
+            child_new->setParent(parent_id, transform_id);
 
             objects_.insert(parent_id, parent_new);
             objects_.insert(child_id, child_new);
 
-            addTransform(t);
         }
     }
 
@@ -86,32 +87,32 @@ void World::updateTransform(const LUId& id, const geo::Pose3D& pose)
 
 // ----------------------------------------------------------------------------------------------------
 
-bool World::getTransform(const LUId& source, const LUId& target, geo::Pose3D& pose) const
+bool World::getTransform(const LUId& source_id, const LUId& target_id, geo::Pose3D& pose) const
 {
-    const ObjectConstPtr& s = object(source);
-    if (!s)
+    const ObjectConstPtr& source = object(source_id);
+    if (!source)
         return false;
 
-    const ObjectConstPtr& t = object(target);
-    if (!t)
+    const ObjectConstPtr& target = object(target_id);
+    if (!target)
         return false;
 
     // Make a set of ancestors;
     std::set<int> ancestors;
-    for(const LUId* n = &source; true; )
+    for(const LUId* n = &source_id; true; )
     {
         ancestors.insert(n->index);
         const ObjectConstPtr& obj = object(*n);
         if (!obj)
-            break;
+            break; // object not found (should never happen)
 
         n = &obj->parent();
         if (n->id.empty())
-            break;
+            break; // No parent
     }
 
     // Find common ancestor
-    const LUId* a_common = &target;
+    const LUId* a_common = &target_id;
     while (true)
     {
         if (ancestors.find(a_common->index) != ancestors.end())
@@ -126,27 +127,42 @@ bool World::getTransform(const LUId& source, const LUId& target, geo::Pose3D& po
             return false; // No common ancestor found
     }
 
-    std::cout << "Common ancestor: " << a_common->id << std::endl;
+    // Calculate transforms from source to common ancestor
+    geo::Pose3D t1 = geo::Pose3D::identity();
+    for(const LUId* n = &source_id; true; )
+    {
+        if (n->index == a_common->index)
+            break;
 
+        const ObjectConstPtr& obj = object(*n);
+        const TransformConstPtr t = transforms_.get(obj->parentTransform());
+        if (!t)
+            return false; // Should never happen
 
+        t1 = t1 * t->pose;
 
+        n = &obj->parent();
+    }
 
+    // Calculate transforms from target to common ancestor
+    geo::Pose3D t2 = geo::Pose3D::identity();
+    for(const LUId* n = &target_id; true; )
+    {
+        if (n->index == a_common->index)
+            break;
 
-    std::cout << "---" << std::endl;
+        const ObjectConstPtr& obj = object(*n);
+        const TransformConstPtr t = transforms_.get(obj->parentTransform());
+        if (!t)
+            return false; // Should never happen
 
+        t2 = t2 * t->pose;
 
+        n = &obj->parent();
+    }
 
+    pose = t1.inverseTimes(t2);
 
-
-    LUId transform_id;
-    if (!s->getDirectTransform(target, transform_id))
-        return false;
-
-    const TransformConstPtr& tr = transforms_.get(transform_id);
-    if (!tr)
-        return false;
-
-    pose = tr->pose;
     return true;
 }
 
