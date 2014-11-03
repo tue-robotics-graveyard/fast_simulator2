@@ -106,16 +106,10 @@ void PluginContainer::step()
     {
         UpdateRequestPtr update_request(new UpdateRequest);
 
-        std::cout << object_id_.index << std::endl;
-
-        ObjectConstPtr obj;
-        if (!object_id_.id.empty())
-            obj = world_current_->object(object_id_);
-
         plugin_->process(*world_current_, cycle_duration_, *update_request);
 
-        if (obj)
-            plugin_->process(*world_current_, *obj, cycle_duration_, *update_request);
+        if (!object_id_.id.empty())
+            plugin_->process(*world_current_, object_id_, cycle_duration_, *update_request);
 
         // If the received update_request was not empty, set it
         if (!update_request->empty())

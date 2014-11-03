@@ -26,7 +26,7 @@ public:
 
     virtual void process(const World& world, double dt, UpdateRequest& req) {}
 
-    virtual void process(const World& world, const Object& obj, double dt, UpdateRequest& req) {}
+    virtual void process(const World& world, const LUId& obj_id, double dt, UpdateRequest& req) {}
 
     const std::string& name() const { return name_; }
 
