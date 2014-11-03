@@ -71,7 +71,7 @@ objects:
     pose: {x: -1.83, y: -0.645, z: 0}
   - id: kinect
     type: kinect
-    pose: {x: 0, y: 0, z: 1.5}
+    pose: {x: 0, y: 0, z: 1, pitch: 1.58, yaw: -1.58}
     parameters:
         topics:
           - rgb: /amigo/top_kinect/rgb/image_color

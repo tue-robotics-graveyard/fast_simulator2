@@ -97,6 +97,13 @@ void Simulator::createObject(const LUId& parent_id, tue::Configuration config, U
         config.value("x", pose.t.x);
         config.value("y", pose.t.y);
         config.value("z", pose.t.z);
+
+        double roll = 0, pitch = 0, yaw = 0;
+        config.value("roll", roll, tue::OPTIONAL);
+        config.value("pitch", pitch, tue::OPTIONAL);
+        config.value("yaw", yaw, tue::OPTIONAL);
+        pose.R.setRPY(roll, pitch, yaw);
+
         config.endGroup();
     }
     else

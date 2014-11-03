@@ -20,6 +20,8 @@ PluginContainer::PluginContainer()
 
 PluginContainer::~PluginContainer()
 {
+    stop_ = true;
+    thread_->join();
     plugin_.reset();
     delete class_loader_;
 }
