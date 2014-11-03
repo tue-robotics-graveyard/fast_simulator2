@@ -68,10 +68,10 @@ models:
 objects:
   - id: walls
     type: robotics_testlab_B.walls
-    pose: {x: -1.83, y: -0.645, z: 0}
+    pose: {x: 0, y: 0, z: 0}
   - id: kinect
     type: kinect
-    pose: {x: 0, y: 0, z: 1, pitch: 1.58, yaw: -1.58}
+    pose: {x: 0, y: 0, z: 8, roll: 0, pitch: 0, yaw: 0}
     parameters:
         topics:
           - rgb: /amigo/top_kinect/rgb/image_color

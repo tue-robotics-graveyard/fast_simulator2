@@ -39,20 +39,25 @@ Simulator::~Simulator()
 
 void addObjectRecursive(UpdateRequest& req, const ed::models::NewEntityConstPtr& e, const geo::Pose3D& pose)
 {
+    std::cout << "POSE: " << pose << std::endl;
+    std::cout << "e->pose: " << e->pose << std::endl;
+
+
     if (e->shape)
     {
         ObjectPtr obj(new Object(e->id));
         obj->setType(e->id);
         obj->setShape(e->shape);
 
+
         req.addObject(obj);
         req.addTransform(LUId("world"), obj->id(), pose * e->pose);
     }
 
-    for(std::vector<ed::models::NewEntityPtr>::const_iterator it = e->children.begin(); it != e->children.end(); ++it)
-    {
-        addObjectRecursive(req, *it, pose * e->pose);
-    }
+//    for(std::vector<ed::models::NewEntityPtr>::const_iterator it = e->children.begin(); it != e->children.end(); ++it)
+//    {
+//        addObjectRecursive(req, *it, pose * e->pose);
+//    }
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -125,7 +130,7 @@ void Simulator::createObject(const LUId& parent_id, tue::Configuration config, U
     {
         ed::models::NewEntityConstPtr e = ed::models::create(type, config, id);
         if (e)
-            addObjectRecursive(req, e, pose);
+            addObjectRecursive(req, e, geo::Pose3D::identity());
         else
             config.addError("Unknown object type: '" + type + "'.");
     }
