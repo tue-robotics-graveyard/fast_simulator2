@@ -31,7 +31,7 @@ public:
 
     WorldConstPtr world() const { return world_; }
 
-    void update(const UpdateRequest& req);
+    void update(World& world, const UpdateRequest& req);
 
 private:
 

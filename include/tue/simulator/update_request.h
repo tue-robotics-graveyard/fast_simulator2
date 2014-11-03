@@ -15,14 +15,22 @@ public:
 
     UpdateRequest() {}
 
-    bool empty() const { return poses.empty(); }
+    bool empty() const { return transforms.empty(); }
 
-    void setPose(const LUId& parent, const LUId& child, const geo::Pose3D& pose)
+    LUId addTransform(const LUId& parent, const LUId& child, const geo::Pose3D& pose)
     {
-        poses.push_back(boost::make_shared<Transform>(parent, child, pose));
+        TransformConstPtr t = boost::make_shared<Transform>(parent, child, pose);
+        transforms.push_back(t);
+        return t->id();
     }
 
-    std::vector<TransformConstPtr> poses;
+    void updateTransform(const LUId& transform_id, const geo::Pose3D& pose)
+    {
+        transform_ups.push_back(std::make_pair<LUId, geo::Pose3D>(transform_id, pose));
+    }
+
+    std::vector<TransformConstPtr> transforms;
+    std::vector<std::pair<LUId, geo::Pose3D> > transform_ups;
 
 };
 

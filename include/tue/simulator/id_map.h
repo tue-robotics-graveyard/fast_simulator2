@@ -26,19 +26,21 @@ public:
 
     // ----------------------------------------------------------------------------------------------------
 
-    inline LUId add(const T& obj)
+    inline void insert(const LUId& id, const T& obj)
     {
-        std::map<UUId, unsigned int>::const_iterator it = id_to_index_.find(obj->id());
-        if (it == id_to_index_.end())
+        int index = getIndex(id);
+        if (index >= 0)
         {
-            id_to_index_[obj->id()] = objects_.size();
-            objects_.push_back(obj);
-            return LUId(obj->id(), objects_.size() - 1);
+            items_[index] = obj;
+            id.index = index;
         }
         else
         {
-            objects_[it->second] = obj;
-            return LUId(obj->id(), it->second);
+            index = items_.size();
+            id_to_index_[id.id] = index;
+            items_.push_back(obj);
+            ids_.push_back(id.id);
+            id.index = index;
         }
     }
 
@@ -50,27 +52,31 @@ public:
         if (index < 0)
             return false;
 
-        objects_[index] = objects_[objects_.size() - 1];
-        objects_.pop_back();
+        items_[index] = items_[items_.size() - 1];
+        items_.pop_back();
     }
 
     // ----------------------------------------------------------------------------------------------------
 
-    inline T get(const LUId& id) const
+    inline const T& get(const LUId& id) const
     {
         int index = getIndex(id);
         id.index = index;
         if (index >= 0)
-            return objects_[index];
+            return items_[index];
         else
-            return ObjectConstPtr();
+            return null_;
     }
 
-    inline const std::vector<T>& getAll() const { return objects_; }
+    inline const std::vector<T>& getAll() const { return items_; }
 
 private:
 
-    std::vector<T> objects_;
+    T null_;
+
+    std::vector<UUId> ids_;
+
+    std::vector<T> items_;
 
     std::map<UUId, unsigned int> id_to_index_;
 
@@ -79,7 +85,7 @@ private:
     inline int getIndex(const LUId& id) const
     {
         int id_index = id.index;
-        if (id_index >= 0 && id_index < objects_.size() && id.id == objects_[id_index]->id())
+        if (id_index >= 0 && id_index < items_.size() && id.id == ids_[id_index])
             return id_index;
         else
         {

@@ -248,23 +248,25 @@ void Simulator::step(double dt, std::vector<ObjectConstPtr>& changed_objects)
 //        }
 //    }
 
-    if (robot_)
-    {
-        // Update the robot sensors
-        std::vector<ObjectConstPtr> sensors;
-        std::vector<geo::Pose3D> sensor_poses;
+//    if (robot_)
+//    {
+//        // Update the robot sensors
+//        std::vector<ObjectConstPtr> sensors;
+//        std::vector<geo::Pose3D> sensor_poses;
 
-        robot_->getSensors(sensors, sensor_poses);
+//        robot_->getSensors(sensors, sensor_poses);
 
-        for(unsigned int i = 0; i < sensors.size(); ++i)
-        {
-            sensors[i]->sense(*world_, sensor_poses[i]);
-        }
-    }
+//        for(unsigned int i = 0; i < sensors.size(); ++i)
+//        {
+//            sensors[i]->sense(*world_, sensor_poses[i]);
+//        }
+//    }
 
 //    world_ = world_updated;
 
     // - - - - - - - - - - - - - - -
+
+    WorldPtr world_updated;
 
     // collect all update requests
     std::vector<PluginContainerPtr> plugins_with_requests;
@@ -274,10 +276,16 @@ void Simulator::step(double dt, std::vector<ObjectConstPtr>& changed_objects)
 
         if (c->updateRequest())
         {
-            update(*c->updateRequest());
+            if (!world_updated)
+                world_updated = boost::make_shared<World>(*world_);   // Create a world copy
+
+            update(*world_updated, *c->updateRequest());
             plugins_with_requests.push_back(c);
         }
     }
+
+    if (world_updated)
+        world_ = world_updated; // Swap to updated world (if something changed)
 
     // Set the new (updated) world
     for(std::map<std::string, PluginContainerPtr>::iterator it = plugin_containers_.begin(); it != plugin_containers_.end(); ++it)
@@ -296,14 +304,18 @@ void Simulator::step(double dt, std::vector<ObjectConstPtr>& changed_objects)
 
 // ----------------------------------------------------------------------------------------------------
 
-void Simulator::update(const UpdateRequest& req)
+void Simulator::update(World& world, const UpdateRequest& req)
 {
-    WorldPtr world_updated(new World(*world_));
-
     // Add transforms
-    for(std::vector<TransformConstPtr>::const_iterator it = req.poses.begin(); it != req.poses.end(); ++it)
+    for(std::vector<TransformConstPtr>::const_iterator it = req.transforms.begin(); it != req.transforms.end(); ++it)
     {
-        world_updated->addTransform(*it);
+        world.addTransform(*it);
+    }
+
+    // Update transforms
+    for(std::vector<std::pair<LUId, geo::Pose3D> >::const_iterator it = req.transform_ups.begin(); it != req.transform_ups.end(); ++it)
+    {
+        world.updateTransform(it->first, it->second);
     }
 //    req.poses
 }

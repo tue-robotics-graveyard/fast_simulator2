@@ -16,7 +16,12 @@ public:
 
     virtual ~World();
 
-    inline LUId addObject(const ObjectConstPtr& obj) { return objects_.add(obj); }
+    inline LUId addObject(const ObjectConstPtr& obj)
+    {
+        LUId id(obj->id());
+        objects_.insert(id, obj);
+        return id;
+    }
 
     inline bool removeObject(const LUId& id) { return objects_.remove(id); }
 
@@ -26,7 +31,9 @@ public:
 
     LUId addTransform(const TransformConstPtr& t);
 
-    bool getTransform(const LUId& source, const LUId& target) const;
+    void updateTransform(const LUId& id, const geo::Pose3D& pose);
+
+    bool getTransform(const LUId& source, const LUId& target, geo::Pose3D& t) const;
 
 private:
 
