@@ -24,9 +24,6 @@ World::~World()
 
 void World::update(const UpdateRequest& req)
 {
-
-    std::cout << "UPDATE" << std::endl;
-
     // Add objects
     for(std::vector<std::pair<LUId, ObjectConstPtr> >::const_iterator it = req.objects.begin(); it != req.objects.end(); ++it)
     {
@@ -98,6 +95,48 @@ bool World::getTransform(const LUId& source, const LUId& target, geo::Pose3D& po
     const ObjectConstPtr& t = object(target);
     if (!t)
         return false;
+
+    // Make a set of ancestors;
+    std::set<int> ancestors;
+    for(const LUId* n = &source; true; )
+    {
+        ancestors.insert(n->index);
+        const ObjectConstPtr& obj = object(*n);
+        if (!obj)
+            break;
+
+        n = &obj->parent();
+        if (n->id.empty())
+            break;
+    }
+
+    // Find common ancestor
+    const LUId* a_common = &target;
+    while (true)
+    {
+        if (ancestors.find(a_common->index) != ancestors.end())
+            break;  // Found it!
+
+        const ObjectConstPtr& obj = object(*a_common);
+        if (!obj)
+            return false; // object not found (should never happen)
+
+        a_common = &obj->parent();
+        if (a_common->id.empty())
+            return false; // No common ancestor found
+    }
+
+    std::cout << "Common ancestor: " << a_common->id << std::endl;
+
+
+
+
+
+    std::cout << "---" << std::endl;
+
+
+
+
 
     LUId transform_id;
     if (!s->getDirectTransform(target, transform_id))
