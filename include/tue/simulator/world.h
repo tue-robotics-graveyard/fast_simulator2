@@ -16,6 +16,10 @@ public:
 
     virtual ~World();
 
+    void update(const UpdateRequest& req);
+
+    const LUId& rootId() const { return root_id_; }
+
     inline LUId addObject(const ObjectConstPtr& obj)
     {
         LUId id(obj->id());
@@ -36,6 +40,8 @@ public:
     bool getTransform(const LUId& source, const LUId& target, geo::Pose3D& t) const;
 
 private:
+
+    LUId root_id_;
 
     IDMap<ObjectConstPtr> objects_;
 

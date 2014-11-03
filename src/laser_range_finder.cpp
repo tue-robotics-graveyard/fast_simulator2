@@ -38,7 +38,7 @@ void LaserRangeFinder::sense(const World& world, const geo::Pose3D& sensor_pose)
 
         if (shape)
         {
-            lrf_.render(*shape, sensor_pose, obj->pose(), ranges);
+//            lrf_.render(*shape, sensor_pose, obj->pose(), ranges);
         }
     }
 }

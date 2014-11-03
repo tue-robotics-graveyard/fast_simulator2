@@ -1,6 +1,6 @@
 #include "tue/simulator/world.h"
-
 #include "tue/simulator/object.h"
+#include "tue/simulator/update_request.h"
 
 namespace sim
 {
@@ -9,12 +9,60 @@ namespace sim
 
 World::World()
 {
+    // Add root object
+    ObjectPtr root = boost::make_shared<Object>("world");
+    root_id_ = addObject(root);
 }
 
 // ----------------------------------------------------------------------------------------------------
 
 World::~World()
 {
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void World::update(const UpdateRequest& req)
+{
+
+    std::cout << "UPDATE" << std::endl;
+
+    // Add objects
+    for(std::vector<std::pair<LUId, ObjectConstPtr> >::const_iterator it = req.objects.begin(); it != req.objects.end(); ++it)
+    {
+        objects_.insert(it->first, it->second);
+    }
+
+    // Add transforms
+    for(std::vector<TransformConstPtr>::const_iterator it = req.transforms.begin(); it != req.transforms.end(); ++it)
+    {
+        const TransformConstPtr& t = *it;
+        const LUId& child_id = t->child;
+        const LUId& parent_id = t->parent;
+
+        const ObjectConstPtr& parent = object(parent_id);
+        const ObjectConstPtr& child = object(child_id);
+
+        if (parent && child)
+        {
+            ObjectPtr parent_new = boost::make_shared<Object>(*parent);
+            ObjectPtr child_new = boost::make_shared<Object>(*child);
+
+            parent_new->addTransform(child_id, t->id());
+            child_new->setParent(parent_id);
+
+            objects_.insert(parent_id, parent_new);
+            objects_.insert(child_id, child_new);
+
+            addTransform(t);
+        }
+    }
+
+    // Update transforms
+    for(std::vector<std::pair<LUId, geo::Pose3D> >::const_iterator it = req.transform_ups.begin(); it != req.transform_ups.end(); ++it)
+    {
+        updateTransform(it->first, it->second);
+    }
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -41,10 +89,26 @@ void World::updateTransform(const LUId& id, const geo::Pose3D& pose)
 
 // ----------------------------------------------------------------------------------------------------
 
-bool World::getTransform(const LUId& source, const LUId& target, geo::Pose3D& t) const
+bool World::getTransform(const LUId& source, const LUId& target, geo::Pose3D& pose) const
 {
-//    ObjectConstPtr t = object(source);
-//    t->
+    const ObjectConstPtr& s = object(source);
+    if (!s)
+        return false;
+
+    const ObjectConstPtr& t = object(target);
+    if (!t)
+        return false;
+
+    LUId transform_id;
+    if (!s->getDirectTransform(target, transform_id))
+        return false;
+
+    const TransformConstPtr& tr = transforms_.get(transform_id);
+    if (!tr)
+        return false;
+
+    pose = tr->pose;
+    return true;
 }
 
 }

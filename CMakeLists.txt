@@ -78,6 +78,7 @@ add_library(ed_simulator_plugin
     src/laser_range_finder.cpp
     src/world.cpp
     src/plugin_container.cpp
+	src/update_request.cpp
     ${HEADER_FILES}
 )
 target_link_libraries(ed_simulator_plugin ${catkin_LIBRARIES})

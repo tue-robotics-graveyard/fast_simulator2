@@ -20,7 +20,7 @@
 void addToUpdateRequest(const sim::ObjectConstPtr& obj, ed::UpdateRequest& req)
 {
     ed::EntityPtr e(new ed::Entity(obj->id()));
-    e->setPose(obj->pose());
+//    e->setPose(obj->pose());
     e->setType(obj->type());
     e->setShape(obj->shape());
 

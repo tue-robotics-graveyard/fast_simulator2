@@ -23,7 +23,18 @@ void BaseController::process(const sim::World& world, const sim::Object& obj, do
 {
     std::cout << "BaseController::process" << std::endl;
 
-    std::cout << obj.id() << ": " << obj.pose() << std::endl;
+    const sim::ObjectConstPtr& o1 = world.object(sim::LUId("world"));
+    const sim::ObjectConstPtr& o2 = world.object(sim::LUId("walls"));
+    if (o1 && o2)
+    {
+        geo::Pose3D t;
+        if (world.getTransform(sim::LUId("world"), sim::LUId("walls"), t))
+        {
+            std::cout << t << std::endl;
+        }
+    }
+
+//    std::cout << obj.id() << ": " << obj.pose() << std::endl;
 
 //    req.setPose(obj.id(), geo::Pose3D::identity());
 }

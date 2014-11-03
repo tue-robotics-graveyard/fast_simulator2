@@ -37,20 +37,21 @@ Simulator::~Simulator()
 
 // ----------------------------------------------------------------------------------------------------
 
-void addObjectRecursive(Simulator& sim, const ed::models::NewEntityConstPtr& e, const geo::Pose3D& pose)
+void addObjectRecursive(UpdateRequest& req, const ed::models::NewEntityConstPtr& e, const geo::Pose3D& pose)
 {
     if (e->shape)
     {
         ObjectPtr obj(new Object(e->id));
         obj->setType(e->id);
-        obj->setPose(pose * e->pose);
         obj->setShape(e->shape);
-        sim.addObject(obj);
+
+        req.addObject(obj);
+        req.addTransform(LUId("world"), obj->id(), pose * e->pose);
     }
 
     for(std::vector<ed::models::NewEntityPtr>::const_iterator it = e->children.begin(); it != e->children.end(); ++it)
     {
-        addObjectRecursive(sim, *it, pose * e->pose);
+        addObjectRecursive(req, *it, pose * e->pose);
     }
 }
 
@@ -84,7 +85,7 @@ tue::Configuration expandObjectConfig(const std::map<std::string, std::string>& 
 
 // ----------------------------------------------------------------------------------------------------
 
-void createObject(Simulator& sim, const std::map<std::string, std::string>& models,
+void createObject(UpdateRequest& req, const std::map<std::string, std::string>& models,
                   const std::string& id, const std::string& type,
                   const geo::Pose3D& pose, tue::Configuration config)
 {
@@ -103,7 +104,7 @@ void createObject(Simulator& sim, const std::map<std::string, std::string>& mode
                 std::string child_id, child_type;
                 if (config.value("id", child_id) && config.value("type", child_type))
                 {
-                    createObject(sim, models, child_id, child_type, geo::Pose3D(), cfg);
+                    createObject(req, models, child_id, child_type, geo::Pose3D(), cfg);
                 }
             }
             cfg.endArray();
@@ -130,7 +131,7 @@ void createObject(Simulator& sim, const std::map<std::string, std::string>& mode
         ed::models::NewEntityConstPtr e = ed::models::create(type, config, id);
         if (e)
         {
-            addObjectRecursive(sim, e, pose);
+            addObjectRecursive(req, e, pose);
         }
         else
         {
@@ -145,6 +146,8 @@ void createObject(Simulator& sim, const std::map<std::string, std::string>& mode
 
 void Simulator::configure(tue::Configuration config)
 {
+    UpdateRequest req;
+
     if (config.readGroup("robot"))
     {
         RobotPtr robot(new Robot());
@@ -193,7 +196,7 @@ void Simulator::configure(tue::Configuration config)
                 }
 
                 if (!config.hasError())
-                    createObject(*this, models_, id, type, pose, config);
+                    createObject(req, models_, id, type, pose, config);
 
                 if (config.readArray("plugins"))
                 {
@@ -228,6 +231,14 @@ void Simulator::configure(tue::Configuration config)
 
         config.endArray();
     }
+
+    if (!req.empty())
+    {
+        WorldPtr world_updated = boost::make_shared<World>(*world_);   // Create a world copy
+        world_updated->update(req);
+        world_ = world_updated;
+    }
+
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -279,7 +290,7 @@ void Simulator::step(double dt, std::vector<ObjectConstPtr>& changed_objects)
             if (!world_updated)
                 world_updated = boost::make_shared<World>(*world_);   // Create a world copy
 
-            update(*world_updated, *c->updateRequest());
+            world_updated->update(*c->updateRequest());
             plugins_with_requests.push_back(c);
         }
     }
@@ -300,31 +311,6 @@ void Simulator::step(double dt, std::vector<ObjectConstPtr>& changed_objects)
         PluginContainerPtr c = *it;
         c->clearUpdateRequest();
     }
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-void Simulator::update(World& world, const UpdateRequest& req)
-{
-    // Add transforms
-    for(std::vector<TransformConstPtr>::const_iterator it = req.transforms.begin(); it != req.transforms.end(); ++it)
-    {
-        world.addTransform(*it);
-    }
-
-    // Update transforms
-    for(std::vector<std::pair<LUId, geo::Pose3D> >::const_iterator it = req.transform_ups.begin(); it != req.transform_ups.end(); ++it)
-    {
-        world.updateTransform(it->first, it->second);
-    }
-//    req.poses
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-void Simulator::addObject(const ObjectConstPtr& object)
-{
-//    world_->addObject(object);
 }
 
 // ----------------------------------------------------------------------------------------------------

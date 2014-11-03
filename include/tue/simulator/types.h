@@ -39,6 +39,9 @@ struct LUId
 {
     LUId(const UUId& id_ = "", int index_ = -1) : id(id_), index(index_) {}
 
+    inline bool operator<(const LUId& other) const { return id < other.id; }
+    inline bool operator==(const LUId& other) const { return id == other.id; }
+
     UUId id;
     mutable int index;
 };

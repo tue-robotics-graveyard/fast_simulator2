@@ -156,16 +156,16 @@ void DepthSensor::sense(const World& world, const geo::Pose3D& sensor_pose) cons
 
             if (shape)
             {
-                // Calculate pose of object relative to camera
-                geo::Pose3D rel_pose = geolib_pose.inverse() * obj->pose();
+//                // Calculate pose of object relative to camera
+//                geo::Pose3D rel_pose = geolib_pose.inverse() * obj->pose();
 
-                // Set render options
-                geo::RenderOptions opt;
-                opt.setMesh(shape->getMesh(), rel_pose);
-                DepthSensorRenderResult res(depth_image, depth_width_, depth_height_);
+//                // Set render options
+//                geo::RenderOptions opt;
+//                opt.setMesh(shape->getMesh(), rel_pose);
+//                DepthSensorRenderResult res(depth_image, depth_width_, depth_height_);
 
-                // Render
-                depth_rasterizer_.render(opt, res);
+//                // Render
+//                depth_rasterizer_.render(opt, res);
             }
         }
     }

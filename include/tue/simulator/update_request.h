@@ -2,7 +2,6 @@
 #define ED_SIMULATOR_UPDATE_REQUEST_H_
 
 #include "types.h"
-
 #include <geolib/datatypes.h>
 
 namespace sim
@@ -15,7 +14,14 @@ public:
 
     UpdateRequest() {}
 
-    bool empty() const { return transforms.empty(); }
+    inline bool empty() const { return objects.empty() && transforms.empty() && transform_ups.empty(); }
+
+    LUId addObject(const ObjectConstPtr& obj);
+
+    void updateObject(const LUId& id, const ObjectConstPtr& obj)
+    {
+        objects.push_back(std::pair<LUId, ObjectConstPtr>(id, obj));
+    }
 
     LUId addTransform(const LUId& parent, const LUId& child, const geo::Pose3D& pose)
     {
@@ -29,6 +35,7 @@ public:
         transform_ups.push_back(std::make_pair<LUId, geo::Pose3D>(transform_id, pose));
     }
 
+    std::vector<std::pair<LUId, ObjectConstPtr> > objects;
     std::vector<TransformConstPtr> transforms;
     std::vector<std::pair<LUId, geo::Pose3D> > transform_ups;
 

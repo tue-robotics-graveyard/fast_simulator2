@@ -24,14 +24,10 @@ public:
 
     void step(double dt, std::vector<ObjectConstPtr>& changed_objects);
 
-    void addObject(const ObjectConstPtr& object);
-
     PluginContainerPtr loadPlugin(const std::string plugin_name, const std::string& lib_filename,
                                   tue::Configuration config, std::string& error);
 
     WorldConstPtr world() const { return world_; }
-
-    void update(World& world, const UpdateRequest& req);
 
 private:
 

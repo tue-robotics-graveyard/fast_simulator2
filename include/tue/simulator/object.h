@@ -27,12 +27,19 @@ public:
 
     const UUId& id() const { return id_; }
     const std::string& type() const { return type_; }
-    const geo::Pose3D& pose() const { return pose_; }
     geo::ShapeConstPtr shape() const { return shape_; }
 
-    void setPose(const geo::Pose3D& pose) { pose_ = pose; }
     void setShape(const geo::ShapeConstPtr& shape) { shape_ = shape; }
     void setType(const std::string& type) { type_ = type; }
+
+    // TRANSFORMS
+
+    const LUId& parent() const { return parent_; }
+    bool getDirectTransform(const LUId& child_id, LUId& transform_id) const;
+
+    void addTransform(const LUId& child_id, const LUId& transform_id) { transforms_[child_id] = transform_id; }
+    void setParent(const LUId& parent_id) { parent_ = parent_id; }
+
 
 private:
 
@@ -42,10 +49,8 @@ private:
 
     geo::ShapeConstPtr shape_;
 
-    geo::Pose3D pose_;
-
-    bool moving_;
-    geo::Pose3D abs_velocity_;
+//    bool moving_;
+//    geo::Pose3D abs_velocity_;
 
     std::map<LUId, LUId> transforms_;
     LUId parent_;
