@@ -95,4 +95,6 @@ target_link_libraries(ed_simulator ed_simulator_plugin)
 add_library(sim_base_controller plugins/base_controller.cpp)
 target_link_libraries(sim_base_controller ed_simulator_plugin)
 
+add_library(sim_depth_sensor plugins/depth_sensor_plugin.cpp)
+target_link_libraries(sim_depth_sensor ed_simulator_plugin)
 

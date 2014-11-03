@@ -37,8 +37,8 @@ robot:
 models:
   - name: kinect
     plugins:
-      - name: amigo_base_controller
-        lib: /home/sdries/ros/hydro/dev/devel/lib/libsim_depth_sensor.so   
+      - name: kinect_depth_sensor
+        lib: /home/sdries/ros/hydro/dev/devel/lib/libsim_depth_sensor.so 
     parameters:
         depth:
             width: 640
@@ -69,9 +69,19 @@ objects:
   - id: walls
     type: robotics_testlab_B.walls
     pose: {x: -1.83, y: -0.645, z: 0}
-    plugins:
-      - name: amigo_base_controller
-        lib: /home/sdries/ros/hydro/dev/devel/lib/libsim_base_controller.so
+  - id: kinect
+    type: kinect
+    pose: {x: 0, y: 0, z: 1.5}
+    parameters:
+        topics:
+          - rgb: /amigo/top_kinect/rgb/image_color
+          - rgb: /amigo/top_kinect/rgb/image_color_rect
+          - rgb_info: /amigo/top_kinect/rgb/camera_info
+          - depth: /amigo/top_kinect/depth_registred/image
+          - depth: /amigo/top_kinect/depth_registred/image_rect
+          - depth_info: /amigo/top_kinect/depth_registered/camera_info
+          - rgbd: /amigo/top_kinect/rgbd
+        frame_id: /amigo/top_kinect/openni_rgb_optical_frame      
 #  - id: test
 #    type: amigo
 #    pose: {x: 0, y: 0, z: 0}

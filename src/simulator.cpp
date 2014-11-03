@@ -85,61 +85,83 @@ tue::Configuration expandObjectConfig(const std::map<std::string, std::string>& 
 
 // ----------------------------------------------------------------------------------------------------
 
-void createObject(UpdateRequest& req, const std::map<std::string, std::string>& models,
-                  const std::string& id, const std::string& type,
-                  const geo::Pose3D& pose, tue::Configuration config)
+void Simulator::createObject(const LUId& parent_id, tue::Configuration config, UpdateRequest& req)
 {
-    // Try own models first
-    std::map<std::string, std::string>::const_iterator it = models.find(type);
-    if (it != models.end())
+    std::string id, type;
+    if (!config.value("id", id) || !config.value("type", type))
+        return;
+
+    geo::Pose3D pose = geo::Pose3D::identity();
+    if (config.readGroup("pose", tue::REQUIRED))
     {
-        tue::Configuration cfg = expandObjectConfig(models, config);
-        std::cout << cfg << std::endl;
-
-        //  Composition
-        if (cfg.readArray("children"))
-        {
-            while(cfg.nextArrayItem())
-            {
-                std::string child_id, child_type;
-                if (config.value("id", child_id) && config.value("type", child_type))
-                {
-                    createObject(req, models, child_id, child_type, geo::Pose3D(), cfg);
-                }
-            }
-            cfg.endArray();
-        }
-
-//        ObjectPtr e;
-//        std::string type;
-//        if (cfg.value("type", type, tue::OPTIONAL))
-//        {
-//            e = createObject(sim, models, id, type, pose, config);
-//        }
-//        else
-//        {
-//            e = ObjectPtr(new Object(id));
-//            e->setType(type);
-//            e->setPose(pose);
-//            sim.addObject(e);
-//        }
-
-//        return e;
+        config.value("x", pose.t.x);
+        config.value("y", pose.t.y);
+        config.value("z", pose.t.z);
+        config.endGroup();
     }
-    else // Try the ED database
+    else
+        return;
+
+    std::map<std::string, std::string>::const_iterator it = models_.find(type);
+    if (it != models_.end())
+    {
+        config = expandObjectConfig(models_, config);
+
+        // Add object
+        ObjectPtr e = boost::make_shared<Object>(id);
+        e->setType(type);
+        LUId obj_id = req.addObject(e);
+
+        req.addTransform(parent_id, obj_id, pose);
+    }
+    else
     {
         ed::models::NewEntityConstPtr e = ed::models::create(type, config, id);
         if (e)
-        {
             addObjectRecursive(req, e, pose);
-        }
         else
-        {
             config.addError("Unknown object type: '" + type + "'.");
-        }
     }
 
-//    return ObjectPtr();
+    tue::Configuration params;
+    if (config.readGroup("parameters"))
+    {
+        params = config;
+        config.endGroup();
+    }
+
+    if (config.readArray("plugins"))
+    {
+        while (config.nextArrayItem())
+        {
+            std::string name, lib_filename;
+            if (config.value("name", name) & config.value("lib", lib_filename))
+            {
+                tue::Configuration plugin_cfg;
+                plugin_cfg.setValue("_object", id);
+                plugin_cfg.add(params);
+
+                std::string load_error;
+                loadPlugin(name, lib_filename, plugin_cfg, load_error);
+
+                if (!load_error.empty())
+                {
+                    config.addError(load_error);
+                }
+            }
+        }
+        config.endArray();
+    }
+
+    //  Composition
+    if (config.readArray("children"))
+    {
+        while(config.nextArrayItem())
+        {
+            createObject(id, config, req);
+        }
+        config.endArray();
+    }
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -178,55 +200,7 @@ void Simulator::configure(tue::Configuration config)
     {
         while (config.nextArrayItem())
         {
-            std::string id, type;
-            if (config.value("id", id) && config.value("type", type))
-            {
-                geo::Pose3D pose = geo::Pose3D::identity();
-
-                if (config.readGroup("pose"))
-                {
-                    config.value("x", pose.t.x);
-                    config.value("y", pose.t.y);
-                    config.value("z", pose.t.z);
-                    config.endGroup();
-                }
-                else
-                {
-                    config.addError("Object does not contain pose");
-                }
-
-                if (!config.hasError())
-                    createObject(req, models_, id, type, pose, config);
-
-                if (config.readArray("plugins"))
-                {
-                    while (config.nextArrayItem())
-                    {
-                        std::string name, lib_filename;
-                        if (config.value("name", name) & config.value("lib", lib_filename))
-                        {
-                            tue::Configuration plugin_cfg;
-                            plugin_cfg.setValue("_object", id);
-
-                            if (config.readGroup("parameters"))
-                            {
-                                plugin_cfg.add(config);
-                                config.endGroup();
-                            }
-
-                            // Load with no parameters
-                            std::string load_error;
-                            loadPlugin(name, lib_filename, plugin_cfg, load_error);
-
-                            if (!load_error.empty())
-                            {
-                                config.addError(load_error);
-                            }
-                        }
-                    }
-                    config.endArray();
-                }
-            }
+            createObject(world_->rootId(), config, req);
         }
 
         config.endArray();
@@ -238,7 +212,6 @@ void Simulator::configure(tue::Configuration config)
         world_updated->update(req);
         world_ = world_updated;
     }
-
 }
 
 // ----------------------------------------------------------------------------------------------------
