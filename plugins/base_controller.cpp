@@ -12,7 +12,7 @@ BaseController::BaseController()
 
 // ----------------------------------------------------------------------------------------------------
 
-void BaseController::configure(tue::Configuration config)
+void BaseController::configure(tue::Configuration config, const sim::LUId& obj_id)
 {
 
 }

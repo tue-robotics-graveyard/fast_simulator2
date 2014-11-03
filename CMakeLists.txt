@@ -98,3 +98,6 @@ target_link_libraries(sim_base_controller ed_simulator_plugin)
 add_library(sim_depth_sensor plugins/depth_sensor_plugin.cpp)
 target_link_libraries(sim_depth_sensor ed_simulator_plugin)
 
+add_library(sim_ros_robot plugins/ros_robot_plugin.cpp)
+target_link_libraries(sim_ros_robot ed_simulator_plugin)
+

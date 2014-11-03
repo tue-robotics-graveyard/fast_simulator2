@@ -15,7 +15,7 @@ public:
 
     DepthSensorPlugin();
 
-    void configure(tue::Configuration config);
+    void configure(tue::Configuration config, const sim::LUId& obj_id);
 
     void process(const sim::World& world, const sim::LUId& obj_id, double dt, sim::UpdateRequest& req);
 

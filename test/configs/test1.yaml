@@ -49,8 +49,11 @@ models:
             width: 640
             height: 480
   - name: amigo
+    plugins:
+      - name: amigo-ros_robot
+        lib: /home/sdries/ros/hydro/dev/devel/lib/libsim_ros_robot.so 
     urdf: /home/sdries/ros/hydro/system/src/amigo_description/urdf/amigo.urdf
-    children:
+    sensors:
       - id: top_kinect
         type: kinect
         link: top_kinect/openni_rgb_optical_frame
@@ -82,8 +85,14 @@ objects:
           - depth_info: /amigo/top_kinect/depth_registered/camera_info
           - rgbd: /amigo/top_kinect/rgbd
         frame_id: /amigo/top_kinect/openni_rgb_optical_frame      
-#  - id: test
-#    type: amigo
-#    pose: {x: 0, y: 0, z: 0}
-
+  - id: amigo
+    type: amigo
+    pose: {x: 0, y: 0, z: 0}
+    joints:
+      - name: torso_joint
+        position: 0.4
+      - name: neck_pan_joint
+        position: 0.5
+      - name: neck_tilt_joint
+        position: 0.1
 

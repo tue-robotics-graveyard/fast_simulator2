@@ -50,11 +50,11 @@ PluginPtr PluginContainer::loadPlugin(const std::string plugin_name, const std::
         plugin_ = class_loader_->createInstance<Plugin>(classes.front());
         if (plugin_)
         {
-            // Configure plugin
-            plugin_->configure(config);
-            plugin_->name_ = plugin_name;
-
             config.value("_object", object_id_.id, tue::OPTIONAL);
+
+            // Configure plugin
+            plugin_->configure(config, object_id_);
+            plugin_->name_ = plugin_name;            
 
             return plugin_;
         }

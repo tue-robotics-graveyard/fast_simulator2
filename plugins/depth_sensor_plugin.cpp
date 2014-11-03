@@ -52,7 +52,7 @@ DepthSensorPlugin::DepthSensorPlugin() : render_rgb_(false), render_depth_(false
 
 // ----------------------------------------------------------------------------------------------------
 
-void DepthSensorPlugin::configure(tue::Configuration config)
+void DepthSensorPlugin::configure(tue::Configuration config, const sim::LUId& obj_id)
 {
     if (config.readGroup("rgb"))
     {

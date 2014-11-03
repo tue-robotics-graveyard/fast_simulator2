@@ -20,7 +20,7 @@ public:
 
     Plugin() {}
 
-    virtual void configure(tue::Configuration config) {}
+    virtual void configure(tue::Configuration config, const sim::LUId& obj_id) {}
 
     virtual void initialize() {}
 
