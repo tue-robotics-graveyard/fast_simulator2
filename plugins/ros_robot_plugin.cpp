@@ -88,6 +88,24 @@ void ROSRobotPlugin::configure(tue::Configuration config, const sim::LUId& obj_i
         constructRobot(obj_id.id, obj_id, tree_.getRootSegment(), joints_, init_update_request_);
     }
 
+    if (config.readArray("sensors"))
+    {
+        while(config.nextArrayItem())
+        {
+            sim::LUId link_id, sensor_id;
+            if (config.value("id", sensor_id.id) & config.value("link", link_id.id))
+            {
+                sensor_id.id = obj_id.id + "/" + sensor_id.id;
+                config.setValue("id", sensor_id.id);
+
+                link_id.id = obj_id.id + "/" + link_id.id;
+                sim::LUId sensor_id = init_update_request_.addObject(config);
+                init_update_request_.addTransform(link_id, sensor_id, geo::Pose3D::identity());
+            }
+        }
+        config.endArray();
+    }
+
     if (config.readArray("joints"))
     {
         while(config.nextArrayItem())
@@ -125,6 +143,20 @@ bool ROSRobotPlugin::updateJoint(const std::string& name, double pos, sim::Updat
 
 // ----------------------------------------------------------------------------------------------------
 
+void printTransformTree(const sim::World& world, const sim::LUId& obj_id, const std::string& indent = "")
+{
+    const sim::ObjectConstPtr& obj = world.object(obj_id);
+
+    std::cout << indent << obj_id.id << std::endl;
+
+    for(std::map<sim::LUId, sim::LUId>::const_iterator it = obj->transforms().begin(); it != obj->transforms().end(); ++it)
+    {
+        printTransformTree(world, it->first, indent + "  ");
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void ROSRobotPlugin::process(const sim::World& world, const sim::LUId& obj_id, double dt, sim::UpdateRequest& req)
 {
     if (!init_update_request_.empty())
@@ -138,12 +170,14 @@ void ROSRobotPlugin::process(const sim::World& world, const sim::LUId& obj_id, d
         return;
     }
 
+    printTransformTree(world, world.rootId());
 
-    geo::Pose3D p;
-    if (world.getTransform(sim::LUId("amigo/hand_right"), sim::LUId("amigo/base_link"), p))
-    {
-        std::cout << p << std::endl;
-    }
+
+//    geo::Pose3D p;
+//    if (world.getTransform(sim::LUId("amigo/hand_right"), sim::LUId("amigo/base_link"), p))
+//    {
+//        std::cout << p << std::endl;
+//    }
 }
 
 SIM_REGISTER_PLUGIN(ROSRobotPlugin)

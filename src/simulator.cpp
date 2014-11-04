@@ -86,6 +86,56 @@ tue::Configuration expandObjectConfig(const std::map<std::string, std::string>& 
 
 // ----------------------------------------------------------------------------------------------------
 
+void Simulator::createObject(tue::Configuration config, UpdateRequest& req)
+{
+    std::string id, type;
+    if (!config.value("id", id) || !config.value("type", type))
+        return;
+
+    std::map<std::string, std::string>::const_iterator it = models_.find(type);
+    if (it != models_.end())
+    {
+        config = expandObjectConfig(models_, config);
+
+        // Add object
+        ObjectPtr e = boost::make_shared<Object>(id);
+        e->setType(type);
+        req.addObject(e);
+    }
+
+    tue::Configuration params;
+    if (config.readGroup("parameters"))
+    {
+        params = config;
+        config.endGroup();
+    }
+
+    if (config.readArray("plugins"))
+    {
+        while (config.nextArrayItem())
+        {
+            std::string name, lib_filename;
+            if (config.value("name", name) & config.value("lib", lib_filename))
+            {
+                tue::Configuration plugin_cfg;
+                plugin_cfg.setValue("_object", id);
+                plugin_cfg.add(params);
+
+                std::string load_error;
+                loadPlugin(name, lib_filename, plugin_cfg, load_error);
+
+                if (!load_error.empty())
+                {
+                    config.addError(load_error);
+                }
+            }
+        }
+        config.endArray();
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void Simulator::createObject(const LUId& parent_id, tue::Configuration config, UpdateRequest& req)
 {
     std::string id, type;
@@ -271,7 +321,18 @@ void Simulator::step(double dt, std::vector<ObjectConstPtr>& changed_objects)
             if (!world_updated)
                 world_updated = boost::make_shared<World>(*world_);   // Create a world copy
 
-            world_updated->update(*c->updateRequest());
+            const UpdateRequestConstPtr& req = c->updateRequest();
+            if (!req->object_configs.empty())
+            {
+                UpdateRequest req2;
+                for(std::vector<tue::Configuration>::const_iterator it2 = req->object_configs.begin(); it2 != req->object_configs.end(); ++it2)
+                {
+                    createObject(*it2, req2);
+                }
+                world_updated->update(req2);
+            }
+
+            world_updated->update(*req);
             plugins_with_requests.push_back(c);
         }
     }

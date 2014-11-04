@@ -3,6 +3,7 @@
 
 #include "types.h"
 #include <geolib/datatypes.h>
+#include <tue/config/configuration.h>
 
 namespace sim
 {
@@ -17,6 +18,8 @@ public:
     inline bool empty() const { return objects.empty() && transforms.empty() && transform_ups.empty(); }
 
     LUId addObject(const ObjectConstPtr& obj);
+
+    LUId addObject(tue::Configuration config);
 
     void updateObject(const LUId& id, const ObjectConstPtr& obj)
     {
@@ -36,6 +39,7 @@ public:
     }
 
     std::vector<std::pair<LUId, ObjectConstPtr> > objects;
+    std::vector<tue::Configuration> object_configs;
     std::vector<TransformConstPtr> transforms;
     std::vector<std::pair<LUId, geo::Pose3D> > transform_ups;
 

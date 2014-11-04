@@ -42,6 +42,8 @@ private:
     // Models
     std::map<std::string, std::string> models_;
 
+    void createObject(tue::Configuration config, UpdateRequest& req);
+
     void createObject(const LUId& parent_id, tue::Configuration config, UpdateRequest& req);
 
 };

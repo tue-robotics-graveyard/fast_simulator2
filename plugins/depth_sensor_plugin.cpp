@@ -123,6 +123,16 @@ void DepthSensorPlugin::configure(tue::Configuration config, const sim::LUId& ob
 
 void DepthSensorPlugin::process(const sim::World& world, const sim::LUId& obj_id, double dt, sim::UpdateRequest& req)
 {
+    geo::Pose3D p;
+    if (world.getTransform(obj_id, sim::LUId("world"), p))
+    {
+        std::cout << "KINECT POSE: " << p << std::endl;
+    }
+    else
+    {
+        std::cout << "NO KINECT POSE FOUND" << std::endl;
+    }
+
     // Get ROS current time
     ros::Time time = ros::Time::now();
 

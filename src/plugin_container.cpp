@@ -21,7 +21,10 @@ PluginContainer::PluginContainer()
 PluginContainer::~PluginContainer()
 {
     stop_ = true;
-    thread_->join();
+
+    if (thread_)
+        thread_->join();
+
     plugin_.reset();
     delete class_loader_;
 }
@@ -54,7 +57,14 @@ PluginPtr PluginContainer::loadPlugin(const std::string plugin_name, const std::
 
             // Configure plugin
             plugin_->configure(config, object_id_);
-            plugin_->name_ = plugin_name;            
+            plugin_->name_ = plugin_name;
+
+            if (config.hasError())
+            {
+                std::cout << "ERROR while configuring plugin '" + plugin_name + "':" << std::endl;
+                std::cout << config.error() << std::endl;
+                plugin_.reset();
+            }
 
             return plugin_;
         }

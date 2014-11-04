@@ -45,6 +45,7 @@ public:
         parent_ = parent_id;
         parent_transform_ = parent_transform_id;
     }
+    const std::map<LUId, LUId>& transforms() const { return transforms_; }
 
 private:
 

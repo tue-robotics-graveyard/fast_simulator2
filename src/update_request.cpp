@@ -12,4 +12,15 @@ LUId UpdateRequest::addObject(const ObjectConstPtr& obj)
     return obj->id();
 }
 
+// ----------------------------------------------------------------------------------------------------
+
+LUId UpdateRequest::addObject(tue::Configuration config)
+{
+    object_configs.push_back(config);
+
+    LUId id;
+    config.value("id", id.id);
+    return id;
+}
+
 }
