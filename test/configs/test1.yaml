@@ -76,11 +76,12 @@ objects:
   - id: amigo
     type: amigo
     pose: {x: 0, y: 0, z: 0}
-    joints:
-      - name: torso_joint
-        position: 0.4
-      - name: neck_pan_joint
-        position: 0.5
-      - name: neck_tilt_joint
-        position: 0.1
+    parameters:
+        joints:
+          - name: torso_joint
+            position: 0.4
+          - name: neck_pan_joint
+            position: 0
+          - name: neck_tilt_joint
+            position: 0
 

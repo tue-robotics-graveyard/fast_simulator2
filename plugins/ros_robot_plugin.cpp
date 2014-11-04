@@ -32,7 +32,7 @@ void constructRobot(const std::string& ns, const sim::LUId& parent_id, const KDL
     joint.transform_id = req.addTransform(parent_id, obj->id(), pose);
 
     // Set the joint info
-    joints[ns + "/" + segment.getJoint().getName()] = joint;
+    joints[segment.getJoint().getName()] = joint;
 
     // Recursively add all children
     const std::vector<KDL::SegmentMap::const_iterator>& children = it_segment->second.children;
@@ -170,7 +170,7 @@ void ROSRobotPlugin::process(const sim::World& world, const sim::LUId& obj_id, d
         return;
     }
 
-    printTransformTree(world, world.rootId());
+//    printTransformTree(world, world.rootId());
 
 
 //    geo::Pose3D p;

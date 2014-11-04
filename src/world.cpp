@@ -139,7 +139,7 @@ bool World::getTransform(const LUId& source_id, const LUId& target_id, geo::Pose
         if (!t)
             return false; // Should never happen
 
-        t1 = t1 * t->pose;
+        t1 = t->pose * t1;
 
         n = &obj->parent();
     }
