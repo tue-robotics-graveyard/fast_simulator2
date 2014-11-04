@@ -39,10 +39,6 @@ Simulator::~Simulator()
 
 void addObjectRecursive(UpdateRequest& req, const ed::models::NewEntityConstPtr& e, const geo::Pose3D& pose)
 {
-    std::cout << "POSE: " << pose << std::endl;
-    std::cout << "e->pose: " << e->pose << std::endl;
-
-
     if (e->shape)
     {
         ObjectPtr obj(new Object(e->id));
@@ -54,10 +50,10 @@ void addObjectRecursive(UpdateRequest& req, const ed::models::NewEntityConstPtr&
         req.addTransform(LUId("world"), obj->id(), pose * e->pose);
     }
 
-//    for(std::vector<ed::models::NewEntityPtr>::const_iterator it = e->children.begin(); it != e->children.end(); ++it)
-//    {
-//        addObjectRecursive(req, *it, pose * e->pose);
-//    }
+    for(std::vector<ed::models::NewEntityPtr>::const_iterator it = e->children.begin(); it != e->children.end(); ++it)
+    {
+        addObjectRecursive(req, *it, pose * e->pose);
+    }
 }
 
 // ----------------------------------------------------------------------------------------------------

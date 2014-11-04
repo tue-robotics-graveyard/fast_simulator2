@@ -7,29 +7,41 @@
 #include <fstream>
 #include <sstream>
 
-void constructRobot(const sim::LUId& parent_id, const KDL::SegmentMap::const_iterator& segment,
+#include <tue/simulator/object.h>
+#include <tue/simulator/world.h>
+
+void constructRobot(const std::string& ns, const sim::LUId& parent_id, const KDL::SegmentMap::const_iterator& it_segment,
                     std::map<std::string, Joint>& joints, sim::UpdateRequest& req)
 {
-    const std::vector<KDL::SegmentMap::const_iterator>& children = segment->second.children;
+    const KDL::Segment& segment = it_segment->second.segment;
+
+    // Convert KDL segment to sim object and add it
+    sim::ObjectPtr obj = boost::make_shared<sim::Object>(ns + "/" + segment.getName());
+    req.addObject(obj);
+
+    // Create Joint object
+    Joint joint;
+    joint.position = 0;
+    joint.segment = segment;
+
+    // Calculate pose with default joint position (0)
+    KDL::Frame pose_kdl = segment.pose(joint.position);
+    geo::Pose3D pose(geo::Matrix3(pose_kdl.M.data), geo::Vector3(pose_kdl.p.data));
+
+    // Add the transform
+    joint.transform_id = req.addTransform(parent_id, obj->id(), pose);
+
+    // Set the joint info
+    joints[ns + "/" + segment.getJoint().getName()] = joint;
+
+    // Recursively add all children
+    const std::vector<KDL::SegmentMap::const_iterator>& children = it_segment->second.children;
     for (unsigned int i = 0; i < children.size(); i++)
     {
         const KDL::Segment& child_kdl = children[i]->second.segment;
 
-        Joint joint;
-        joint.position = 0;
-        joint.segment = child_kdl;
-
-        KDL::Frame pose_kdl = child_kdl.pose(joint.position);
-        geo::Pose3D pose(geo::Matrix3(pose_kdl.M.data), geo::Vector3(pose_kdl.p.data));
-
-        req.addObject(...);
-
-        joint.transform_id = req.addTransform(parent_id, child_kdl.getJoint().getName(), pose);
-
-        joints[child_kdl.getJoint().getName()] = joint;
-
         // recursively add segments
-        constructRobot(child_kdl.getName(), children[i], joints, req);
+        constructRobot(ns, obj->id(), children[i], joints, req);
     }
 }
 
@@ -73,7 +85,7 @@ void ROSRobotPlugin::configure(tue::Configuration config, const sim::LUId& obj_i
 
         }
 
-        constructRobot(obj_id, tree_.getRootSegment(), joints_, init_update_request_);
+        constructRobot(obj_id.id, obj_id, tree_.getRootSegment(), joints_, init_update_request_);
     }
 
     if (config.readArray("joints"))
@@ -91,8 +103,6 @@ void ROSRobotPlugin::configure(tue::Configuration config, const sim::LUId& obj_i
 
         config.endArray();
     }
-
-    std::cout << init_update_request_.objects.size() << std::endl;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -129,7 +139,11 @@ void ROSRobotPlugin::process(const sim::World& world, const sim::LUId& obj_id, d
     }
 
 
-    std::cout << "ROS ROBOT " << obj_id.id << std::endl;
+    geo::Pose3D p;
+    if (world.getTransform(sim::LUId("amigo/hand_right"), sim::LUId("amigo/base_link"), p))
+    {
+        std::cout << p << std::endl;
+    }
 }
 
 SIM_REGISTER_PLUGIN(ROSRobotPlugin)
