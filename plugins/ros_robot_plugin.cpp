@@ -54,7 +54,7 @@ ROSRobotPlugin::ROSRobotPlugin()
 // ----------------------------------------------------------------------------------------------------
 
 void ROSRobotPlugin::configure(tue::Configuration config, const sim::LUId& obj_id)
-{
+{   
     std::string urdf_file;
     if (config.value("urdf", urdf_file))
     {

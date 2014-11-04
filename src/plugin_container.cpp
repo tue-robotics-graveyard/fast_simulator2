@@ -84,6 +84,9 @@ void PluginContainer::runThreaded()
 
 void PluginContainer::run()
 {
+    if (!ros::Time::isValid())
+        ros::Time::init();
+
     ros::Rate r(loop_frequency_);
     while(!stop_)
     {

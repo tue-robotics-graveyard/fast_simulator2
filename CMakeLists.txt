@@ -73,8 +73,6 @@ add_library(ed_simulator_plugin
     src/simulator_plugin.cpp
     src/simulator.cpp
     src/object.cpp
-    src/robot.cpp
-    src/depth_sensor.cpp
     src/laser_range_finder.cpp
     src/world.cpp
     src/plugin_container.cpp

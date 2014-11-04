@@ -3,7 +3,6 @@
 #include "tue/simulator/world.h"
 #include "tue/simulator/object.h"
 #include "tue/simulator/update_request.h"
-#include "robot.h"
 
 // Plugin loading
 #include "tue/simulator/plugin.h"
@@ -12,7 +11,6 @@
 
 // Object creation
 #include <tue/config/loaders/yaml.h>
-
 #include <ed/models/models.h>
 
 namespace sim
@@ -228,19 +226,6 @@ void Simulator::configure(tue::Configuration config)
 {
     UpdateRequest req;
 
-    if (config.readGroup("robot"))
-    {
-        RobotPtr robot(new Robot());
-        robot->configure(config.limitScope());
-
-        if (!config.hasError())
-        {
-            robot_ = robot;
-        }
-
-        config.endGroup();
-    }
-
     if (config.readArray("models"))
     {
         while (config.nextArrayItem())
@@ -276,38 +261,6 @@ void Simulator::configure(tue::Configuration config)
 
 void Simulator::step(double dt, std::vector<ObjectConstPtr>& changed_objects)
 {
-//    WorldPtr world_updated(new World(*world_));
-
-//    for(std::map<UUID, ObjectConstPtr>::const_iterator it = world_->objects.begin(); it != world_->objects.end(); ++it)
-//    {
-//        const ObjectConstPtr& obj = it->second;
-
-//        ObjectConstPtr obj_update = obj->step(*world_, dt);
-//        if (obj_update)
-//        {
-//            world_updated->objects[it->first] = obj_update;
-//            changed_objects.push_back(obj_update);
-//        }
-//    }
-
-//    if (robot_)
-//    {
-//        // Update the robot sensors
-//        std::vector<ObjectConstPtr> sensors;
-//        std::vector<geo::Pose3D> sensor_poses;
-
-//        robot_->getSensors(sensors, sensor_poses);
-
-//        for(unsigned int i = 0; i < sensors.size(); ++i)
-//        {
-//            sensors[i]->sense(*world_, sensor_poses[i]);
-//        }
-//    }
-
-//    world_ = world_updated;
-
-    // - - - - - - - - - - - - - - -
-
     WorldPtr world_updated;
 
     // collect all update requests
