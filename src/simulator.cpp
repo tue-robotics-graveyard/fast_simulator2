@@ -67,7 +67,7 @@ tue::Configuration expandObjectConfig(const std::map<std::string, std::string>& 
         {
             tue::Configuration cfg;
             tue::config::loadFromYAMLString(it->second, cfg);
-            cfg.add(config);
+            cfg.data().add(config.data());
 
             return cfg;
         }
@@ -117,7 +117,7 @@ void Simulator::createObject(tue::Configuration config, UpdateRequest& req)
             {
                 tue::Configuration plugin_cfg;
                 plugin_cfg.setValue("_object", id);
-                plugin_cfg.add(params);
+                plugin_cfg.data().add(params.data());
 
                 std::string load_error;
                 loadPlugin(name, lib_filename, plugin_cfg, load_error);
@@ -195,7 +195,7 @@ void Simulator::createObject(const LUId& parent_id, tue::Configuration config, U
             {
                 tue::Configuration plugin_cfg;
                 plugin_cfg.setValue("_object", id);
-                plugin_cfg.add(params);
+                plugin_cfg.data().add(params.data());
 
                 std::string load_error;
                 loadPlugin(name, lib_filename, plugin_cfg, load_error);
