@@ -4,7 +4,7 @@ world_name: none
 
 plugins:
 - name: simulator
-  lib: libed_simulator_plugin.so
+  lib: libfast_simulator2_plugin.so
   parameters:
     robot:
         urdf: /home/sdries/ros/hydro/system/src/amigo_description/urdf/amigo.urdf

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(ed_simulator)
+project(fast_simulator2)
 
 find_package(catkin REQUIRED COMPONENTS
     ed
@@ -69,7 +69,7 @@ set(HEADER_FILES
 )
 
 
-add_library(ed_simulator_plugin
+add_library(fast_simulator2_plugin
     src/simulator_plugin.cpp
     src/simulator.cpp
     src/object.cpp
@@ -79,23 +79,23 @@ add_library(ed_simulator_plugin
 	src/update_request.cpp
     ${HEADER_FILES}
 )
-target_link_libraries(ed_simulator_plugin ${catkin_LIBRARIES})
+target_link_libraries(fast_simulator2_plugin ${catkin_LIBRARIES})
 
-add_executable(ed_simulator
+add_executable(fast_simulator2
     src/main.cpp
 )
-target_link_libraries(ed_simulator ed_simulator_plugin)
+target_link_libraries(fast_simulator2 fast_simulator2_plugin)
 
 # ------------------------------------------------------------------------------------------------
 #                                              PLUGINS
 # ------------------------------------------------------------------------------------------------
 
 add_library(sim_base_controller plugins/base_controller.cpp)
-target_link_libraries(sim_base_controller ed_simulator_plugin)
+target_link_libraries(sim_base_controller fast_simulator2_plugin)
 
 add_library(sim_depth_sensor plugins/depth_sensor_plugin.cpp)
-target_link_libraries(sim_depth_sensor ed_simulator_plugin)
+target_link_libraries(sim_depth_sensor fast_simulator2_plugin)
 
 add_library(sim_ros_robot plugins/ros_robot_plugin.cpp)
-target_link_libraries(sim_ros_robot ed_simulator_plugin)
+target_link_libraries(sim_ros_robot fast_simulator2_plugin)
 
