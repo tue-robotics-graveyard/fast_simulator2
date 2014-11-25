@@ -21,7 +21,7 @@ int main(int argc, char **argv)
     if (argc == 2)
         config_filename = argv[1];
     else
-        config_filename = "/home/sdries/ros/hydro/dev/src/ed_simulator/test/configs/test1.yaml";
+        config_filename = "/home/sdries/ros/hydro/dev/src/fast_simulator2/test/configs/test1.yaml";
 
     // Load the YAML config file
     config.loadFromYAMLFile(config_filename);

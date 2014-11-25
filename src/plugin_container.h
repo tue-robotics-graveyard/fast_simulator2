@@ -1,5 +1,5 @@
-#ifndef ED_SIMULATOR_PLUGIN_CONTAINER_H_
-#define ED_SIMULATOR_PLUGIN_CONTAINER_H_
+#ifndef FAST_SIMULATOR2_PLUGIN_CONTAINER_H_
+#define FAST_SIMULATOR2_PLUGIN_CONTAINER_H_
 
 #include "fast_simulator2/types.h"
 #include <boost/thread.hpp>
