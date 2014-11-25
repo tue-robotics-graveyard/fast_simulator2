@@ -1,5 +1,5 @@
-#include "tue/simulator/update_request.h"
-#include "tue/simulator/object.h"
+#include "fast_simulator2/update_request.h"
+#include "fast_simulator2/object.h"
 
 namespace sim
 {

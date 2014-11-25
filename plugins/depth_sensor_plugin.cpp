@@ -1,6 +1,6 @@
 #include "depth_sensor_plugin.h"
 
-#include "tue/simulator/world.h"
+#include "fast_simulator2/world.h"
 
 #include <geolib/Shape.h>
 #include <geolib/Box.h>

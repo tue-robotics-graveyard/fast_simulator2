@@ -1,11 +1,11 @@
-#include "simulator.h"
+#include "fast_simulator2/simulator.h"
 
-#include "tue/simulator/world.h"
-#include "tue/simulator/object.h"
-#include "tue/simulator/update_request.h"
+#include "fast_simulator2/world.h"
+#include "fast_simulator2/object.h"
+#include "fast_simulator2/update_request.h"
 
 // Plugin loading
-#include "tue/simulator/plugin.h"
+#include "fast_simulator2/plugin.h"
 #include "plugin_container.h"
 #include <tue/filesystem/path.h>
 

@@ -1,6 +1,6 @@
-#include "tue/simulator/world.h"
-#include "tue/simulator/object.h"
-#include "tue/simulator/update_request.h"
+#include "fast_simulator2/world.h"
+#include "fast_simulator2/object.h"
+#include "fast_simulator2/update_request.h"
 
 namespace sim
 {

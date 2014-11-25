@@ -1,5 +1,5 @@
-#ifndef ED_SIMULATOR_PLUGIN_H_
-#define ED_SIMULATOR_PLUGIN_H_
+#ifndef FAST_SIMULATOR2_PLUGIN_H_
+#define FAST_SIMULATOR2_PLUGIN_H_
 
 #include <class_loader/class_loader.h>
 #define SIM_REGISTER_PLUGIN(Derived) CLASS_LOADER_REGISTER_CLASS(Derived, sim::Plugin)

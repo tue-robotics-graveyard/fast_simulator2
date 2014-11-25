@@ -1,5 +1,5 @@
-#ifndef ED_SIMULATOR_OBJECT_H_
-#define ED_SIMULATOR_OBJECT_H_
+#ifndef FAST_SIMULATOR2_OBJECT_H_
+#define FAST_SIMULATOR2_OBJECT_H_
 
 #include "types.h"
 

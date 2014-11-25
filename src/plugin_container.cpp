@@ -1,7 +1,7 @@
 #include "plugin_container.h"
 
-#include "tue/simulator/update_request.h"
-#include "tue/simulator/world.h"
+#include "fast_simulator2/update_request.h"
+#include "fast_simulator2/world.h"
 
 
 #include <ros/rate.h> // TODO: make own implementation

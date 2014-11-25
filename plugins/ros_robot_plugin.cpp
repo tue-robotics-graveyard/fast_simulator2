@@ -7,8 +7,8 @@
 #include <fstream>
 #include <sstream>
 
-#include <tue/simulator/object.h>
-#include <tue/simulator/world.h>
+#include <fast_simulator2/object.h>
+#include <fast_simulator2/world.h>
 
 void constructRobot(const std::string& ns, const sim::LUId& parent_id, const KDL::SegmentMap::const_iterator& it_segment,
                     std::map<std::string, Joint>& joints, sim::UpdateRequest& req)

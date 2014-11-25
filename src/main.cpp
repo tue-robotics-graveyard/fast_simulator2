@@ -1,11 +1,11 @@
-#include "simulator.h"
+#include "fast_simulator2/simulator.h"
 
 #include <tue/config/configuration.h>
 
 #include <iostream>
 
-#include <tue/simulator/id_map.h>
-#include <tue/simulator/object.h>
+#include <fast_simulator2/id_map.h>
+#include <fast_simulator2/object.h>
 #include <sstream>
 
 #include <tue/profiling/timer.h>

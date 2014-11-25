@@ -1,7 +1,7 @@
 #ifndef SIMULATOR_BASE_CONTROLLER_H_
 #define SIMULATOR_BASE_CONTROLLER_H_
 
-#include "tue/simulator/plugin.h"
+#include "fast_simulator2/plugin.h"
 
 class BaseController : public sim::Plugin
 {

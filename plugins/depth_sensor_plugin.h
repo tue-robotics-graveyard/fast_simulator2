@@ -1,7 +1,7 @@
 #ifndef SIMULATOR_DEPTH_SENSOR_PLUGIN_H_
 #define SIMULATOR_DEPTH_SENSOR_PLUGIN_H_
 
-#include "tue/simulator/plugin.h"
+#include "fast_simulator2/plugin.h"
 
 #include <geolib/sensors/DepthCamera.h>
 

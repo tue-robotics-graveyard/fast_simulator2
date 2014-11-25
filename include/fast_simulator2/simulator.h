@@ -1,7 +1,7 @@
-#ifndef ED_SIMULATOR_SIMULATOR_H_
-#define ED_SIMULATOR_SIMULATOR_H_
+#ifndef FAST_SIMULATOR2_SIMULATOR_H_
+#define FAST_SIMULATOR2_SIMULATOR_H_
 
-#include "tue/simulator/types.h"
+#include "fast_simulator2/types.h"
 
 #include <vector>
 #include <map>

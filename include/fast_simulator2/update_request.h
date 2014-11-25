@@ -1,5 +1,5 @@
-#ifndef ED_SIMULATOR_UPDATE_REQUEST_H_
-#define ED_SIMULATOR_UPDATE_REQUEST_H_
+#ifndef FAST_SIMULATOR2_UPDATE_REQUEST_H_
+#define FAST_SIMULATOR2_UPDATE_REQUEST_H_
 
 #include "types.h"
 #include <geolib/datatypes.h>

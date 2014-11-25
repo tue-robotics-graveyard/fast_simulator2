@@ -1,10 +1,10 @@
 #ifndef ED_SIMULATOR_PLUGIN_CONTAINER_H_
 #define ED_SIMULATOR_PLUGIN_CONTAINER_H_
 
-#include "tue/simulator/types.h"
+#include "fast_simulator2/types.h"
 #include <boost/thread.hpp>
 #include <tue/config/configuration.h>
-#include "tue/simulator/plugin.h"
+#include "fast_simulator2/plugin.h"
 
 namespace class_loader { class ClassLoader; }
 

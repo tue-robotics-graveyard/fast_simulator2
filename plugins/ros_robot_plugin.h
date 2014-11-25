@@ -1,10 +1,10 @@
 #ifndef SIMULATOR_ROS_ROBOT_PLUGIN_H_
 #define SIMULATOR_ROS_ROBOT_PLUGIN_H_
 
-#include "tue/simulator/plugin.h"
+#include "fast_simulator2/plugin.h"
 
 #include <kdl/tree.hpp>
-#include <tue/simulator/update_request.h>
+#include <fast_simulator2/update_request.h>
 
 struct Joint
 {

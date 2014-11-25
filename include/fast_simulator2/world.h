@@ -1,5 +1,5 @@
-#ifndef ED_SIMULATOR_WORLD_H_
-#define ED_SIMULATOR_WORLD_H_
+#ifndef FAST_SIMULATOR2_WORLD_H_
+#define FAST_SIMULATOR2_WORLD_H_
 
 #include "object.h"
 #include "id_map.h"
