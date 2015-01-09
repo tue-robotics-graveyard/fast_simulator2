@@ -139,6 +139,8 @@ void DepthSensorPlugin::process(const sim::World& world, const sim::LUId& obj_id
         // Calculate sensor pose in geolib frame
 //        geo::Pose3D geolib_pose = sensor_pose * geo::Pose3D(0, 0, 0, 3.1415, 0, 0);
 
+        std::cout << "----" << std::endl;
+
         depth_image = cv::Mat(depth_height_, depth_width_, CV_32FC1, 0.0);
         for(std::vector<sim::ObjectConstPtr>::const_iterator it = world.objects().begin(); it != world.objects().end(); ++it)
         {
@@ -151,6 +153,9 @@ void DepthSensorPlugin::process(const sim::World& world, const sim::LUId& obj_id
                 // Calculate pose of object relative to camera
                 if (world.getTransform(obj_id, obj->id(), rel_pose))
                 {
+
+                    std::cout << obj->id() << ": " << rel_pose << std::endl;
+
                     // Correction for geolib frame
                     rel_pose = geo::Pose3D(0, 0, 0, 3.1415, 0, 0) * rel_pose;
 

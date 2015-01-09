@@ -12,6 +12,8 @@
 // Object creation
 #include <tue/config/loaders/yaml.h>
 #include <ed/models/models.h>
+#include <ed/update_request.h>
+#include <ed/relation.h>
 
 namespace sim
 {
@@ -35,27 +37,26 @@ Simulator::~Simulator()
 
 // ----------------------------------------------------------------------------------------------------
 
-void addObjectRecursive(UpdateRequest& req, const ed::models::NewEntityConstPtr& e, const geo::Pose3D& pose)
-{
-    if (e->shape)
-    {
-        ObjectPtr obj(new Object(e->id));
-        obj->setType(e->id);
-        obj->setShape(e->shape);
+//void addObjectRecursive(UpdateRequest& req, const ed::models::NewEntityConstPtr& e, const geo::Pose3D& pose)
+//{
+//    if (e->shape)
+//    {
+//        ObjectPtr obj(new Object(e->id));
+//        obj->setType(e->id);
+//        obj->setShape(e->shape);
 
 
-        req.addObject(obj);
-        req.addTransform(LUId("world"), obj->id(), pose * e->pose);
-    }
+//        req.addObject(obj);
+//        req.addTransform(LUId("world"), obj->id(), pose * e->pose);
+//    }
 
-    for(std::vector<ed::models::NewEntityPtr>::const_iterator it = e->children.begin(); it != e->children.end(); ++it)
-    {
-        addObjectRecursive(req, *it, pose * e->pose);
-    }
-}
+//    for(std::vector<ed::models::NewEntityPtr>::const_iterator it = e->children.begin(); it != e->children.end(); ++it)
+//    {
+//        addObjectRecursive(req, *it, pose * e->pose);
+//    }
+//}
 
 // ----------------------------------------------------------------------------------------------------
-
 
 tue::Configuration expandObjectConfig(const std::map<std::string, std::string>& models, tue::Configuration config)
 {
@@ -172,11 +173,50 @@ void Simulator::createObject(const LUId& parent_id, tue::Configuration config, U
     }
     else
     {
-        ed::models::NewEntityConstPtr e = ed::models::create(type, config, id);
-        if (e)
-            addObjectRecursive(req, e, geo::Pose3D::identity());
-        else
+        ed::UpdateRequest update_request;
+        if (!ed::models::create(id, type, update_request))
+        {
             config.addError("Unknown object type: '" + type + "'.");
+            return;
+        }
+
+        // Add objects
+        for(std::map<ed::UUID, geo::ShapeConstPtr>::const_iterator it = update_request.shapes.begin(); it != update_request.shapes.end(); ++it)
+        {
+            ObjectPtr obj(new Object(it->first.str()));
+
+            // Set shape
+            obj->setShape(it->second);
+
+            // Set type
+            std::map<ed::UUID, std::string>::const_iterator it_type = update_request.types.find(it->first);
+            if (it_type != update_request.types.end())
+                obj->setType(it_type->second);
+
+            std::cout << "Adding object " << obj->id() << std::endl;
+
+            req.addObject(obj);
+        }
+
+        // Add relations
+        for(std::map<ed::UUID, std::map<ed::UUID, ed::RelationConstPtr> >::const_iterator it = update_request.relations.begin(); it != update_request.relations.end(); ++it)
+        {
+            const std::map<ed::UUID, ed::RelationConstPtr>& rels = it->second;
+            for(std::map<ed::UUID, ed::RelationConstPtr>::const_iterator it2 = rels.begin(); it2 != rels.end(); ++it2)
+            {
+                const ed::RelationConstPtr& r = it2->second;
+
+                geo::Pose3D rel_pose;
+                if (r->calculateTransform(ed::Time(0), rel_pose))
+                {
+                    req.addTransform(it->first.str(), it2->first.str(), rel_pose);
+
+                    std::cout << "Adding transform " << it->first << " - " << it2->first << ": " << rel_pose << std::endl;
+                }
+            }
+        }
+
+        req.addTransform(LUId("world"), id, pose);
     }
 
     tue::Configuration params;

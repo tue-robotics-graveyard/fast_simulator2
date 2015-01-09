@@ -34,12 +34,12 @@ models:
                 frame_id: /amigo/top_kinect/openni_rgb_optical_frame  
 
 objects:
-  - id: walls
-    type: robotics_testlab_B.walls
-    pose: {x: 0, y: 0, z: 0} 
+  - id: lab
+    type: robotics_testlab_B
+    pose: {x: 0, y: 0, z: 0, yaw: 0} 
   - id: amigo
     type: amigo
-    pose: {x: 0, y: 0, z: 0}
+    pose: {x: 0, y: 0, z: 0, yaw: 0}
     parameters:
         joints:
           - name: torso_joint
