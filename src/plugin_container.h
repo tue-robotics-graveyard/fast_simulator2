@@ -6,6 +6,8 @@
 #include <tue/config/configuration.h>
 #include "fast_simulator2/plugin.h"
 
+#include <ed/types.h>
+
 namespace class_loader { class ClassLoader; }
 
 namespace sim
@@ -31,7 +33,7 @@ public:
 
     const std::string& name() const { return plugin_->name(); }
 
-    UpdateRequestConstPtr updateRequest() const
+    ed::UpdateRequestConstPtr updateRequest() const
     {
         boost::lock_guard<boost::mutex> lg(mutex_update_request_);
         return update_request_;
@@ -43,7 +45,7 @@ public:
         update_request_.reset();
     }
 
-    void setWorld(const WorldConstPtr& world)
+    void setWorld(const ed::WorldModelConstPtr& world)
     {
         boost::lock_guard<boost::mutex> lg(mutex_world_);
         world_new_ = world;
@@ -66,7 +68,7 @@ protected:
 
     mutable boost::mutex mutex_update_request_;
 
-    UpdateRequestPtr update_request_;
+    ed::UpdateRequestPtr update_request_;
 
     boost::shared_ptr<boost::thread> thread_;
 
@@ -76,9 +78,9 @@ protected:
 
     mutable boost::mutex mutex_world_;
 
-    WorldConstPtr world_new_;
+    ed::WorldModelConstPtr world_new_;
 
-    WorldConstPtr world_current_;
+    ed::WorldModelConstPtr world_current_;
 
     // The object this plugin is attached to. Empty is not attached.
     LUId object_id_;

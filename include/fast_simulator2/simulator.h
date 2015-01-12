@@ -3,6 +3,8 @@
 
 #include "fast_simulator2/types.h"
 
+#include <ed/types.h>
+
 #include <vector>
 #include <map>
 
@@ -27,13 +29,15 @@ public:
     PluginContainerPtr loadPlugin(const std::string plugin_name, const std::string& lib_filename,
                                   tue::Configuration config, std::string& error);
 
-    WorldConstPtr world() const { return world_; }
+    const ed::WorldModelConstPtr& world() const { return world_; }
 
 private:
 
     RobotPtr robot_;
 
-    WorldConstPtr world_;
+//    WorldConstPtr world_;
+
+    ed::WorldModelConstPtr world_;
 
     //! Plugins
     std::vector<std::string> plugin_paths_;
@@ -44,7 +48,7 @@ private:
 
     void createObject(tue::Configuration config, UpdateRequest& req);
 
-    void createObject(const LUId& parent_id, tue::Configuration config, UpdateRequest& req);
+    void createObject(const LUId& parent_id, tue::Configuration config, ed::UpdateRequest& req);
 
 };
 

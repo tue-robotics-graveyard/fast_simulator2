@@ -3,6 +3,7 @@
 #include "fast_simulator2/update_request.h"
 #include "fast_simulator2/world.h"
 
+#include <ed/update_request.h>
 
 #include <ros/rate.h> // TODO: make own implementation
 
@@ -119,7 +120,7 @@ void PluginContainer::step()
 
     if (world_current_)
     {
-        UpdateRequestPtr update_request(new UpdateRequest);
+        ed::UpdateRequestPtr update_request(new ed::UpdateRequest);
 
         plugin_->process(*world_current_, cycle_duration_, *update_request);
 

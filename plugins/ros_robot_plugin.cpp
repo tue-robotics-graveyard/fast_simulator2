@@ -10,44 +10,40 @@
 #include <fast_simulator2/object.h>
 #include <fast_simulator2/world.h>
 
-void constructRobot(const std::string& ns, const sim::LUId& parent_id, const KDL::SegmentMap::const_iterator& it_segment,
-                    std::map<std::string, Joint>& joints, sim::UpdateRequest& req)
+// ----------------------------------------------------------------------------------------------------
+
+void ROSRobotPlugin::constructRobot(const ed::UUID& parent_id, const KDL::SegmentMap::const_iterator& it_segment, ed::UpdateRequest& req)
 {
     const KDL::Segment& segment = it_segment->second.segment;
 
-    // Convert KDL segment to sim object and add it
-    sim::ObjectPtr obj = boost::make_shared<sim::Object>(ns + "/" + segment.getName());
-    req.addObject(obj);
+    // Child ID is the segment (link) name
+    ed::UUID child_id = robot_name_ + "/" + segment.getName();
 
-    // Create Joint object
-    Joint joint;
-    joint.position = 0;
-    joint.segment = segment;
+    // Set the entity type (robot_link)
+    req.setType(child_id, "robot_link");
 
-    // Calculate pose with default joint position (0)
-    KDL::Frame pose_kdl = segment.pose(joint.position);
-    geo::Pose3D pose(geo::Matrix3(pose_kdl.M.data), geo::Vector3(pose_kdl.p.data));
+    // Create a joint relation and add id
+    boost::shared_ptr<JointRelation> r(new JointRelation(segment));
+    r->setCacheSize(joint_cache_size_);
+    r->insert(0, 0);
+    req.setRelation(parent_id, child_id, r);
 
-    // Add the transform
-    joint.transform_id = req.addTransform(parent_id, obj->id(), pose);
-
-    // Set the joint info
-    joints[segment.getJoint().getName()] = joint;
+    // Generate relation info that will be used to update the relation
+    RelationInfo& rel_info = joint_name_to_rel_info_[segment.getJoint().getName()];
+    rel_info.parent_id = parent_id;
+    rel_info.child_id = child_id;
+    rel_info.r_idx = ed::INVALID_IDX;
+    rel_info.last_rel = r;
 
     // Recursively add all children
     const std::vector<KDL::SegmentMap::const_iterator>& children = it_segment->second.children;
     for (unsigned int i = 0; i < children.size(); i++)
-    {
-        const KDL::Segment& child_kdl = children[i]->second.segment;
-
-        // recursively add segments
-        constructRobot(ns, obj->id(), children[i], joints, req);
-    }
+        constructRobot(child_id, children[i], req);
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-ROSRobotPlugin::ROSRobotPlugin()
+ROSRobotPlugin::ROSRobotPlugin() : joint_cache_size_(10)
 {
 }
 
@@ -55,6 +51,8 @@ ROSRobotPlugin::ROSRobotPlugin()
 
 void ROSRobotPlugin::configure(tue::Configuration config, const sim::LUId& obj_id)
 {   
+    robot_name_ = obj_id.id;
+
     std::string urdf_file;
     if (config.value("urdf", urdf_file))
     {
@@ -85,7 +83,7 @@ void ROSRobotPlugin::configure(tue::Configuration config, const sim::LUId& obj_i
 
         }
 
-        constructRobot(obj_id.id, obj_id, tree_.getRootSegment(), joints_, init_update_request_);
+        constructRobot(obj_id.id, tree_.getRootSegment(), init_update_request_);
     }
 
     if (config.readArray("sensors"))
@@ -95,10 +93,10 @@ void ROSRobotPlugin::configure(tue::Configuration config, const sim::LUId& obj_i
             sim::LUId link_id, sensor_id;
             if (config.value("id", sensor_id.id) & config.value("link", link_id.id))
             {
-                sensor_id.id = obj_id.id + "/" + sensor_id.id;
+                sensor_id.id = robot_name_ + "/" + sensor_id.id;
                 config.setValue("id", sensor_id.id);
 
-                link_id.id = obj_id.id + "/" + link_id.id;
+                link_id.id = robot_name_ + "/" + link_id.id;
                 sim::LUId sensor_id = init_update_request_.addObject(config);
                 init_update_request_.addTransform(link_id, sensor_id, geo::Pose3D::identity());
             }
@@ -157,7 +155,7 @@ void printTransformTree(const sim::World& world, const sim::LUId& obj_id, const 
 
 // ----------------------------------------------------------------------------------------------------
 
-void ROSRobotPlugin::process(const sim::World& world, const sim::LUId& obj_id, double dt, sim::UpdateRequest& req)
+void ROSRobotPlugin::process(const ed::WorldModel& world, const sim::LUId& obj_id, double dt, ed::UpdateRequest& req)
 {
     if (!init_update_request_.empty())
     {

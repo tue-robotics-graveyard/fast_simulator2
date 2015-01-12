@@ -12,7 +12,6 @@
 
 int main(int argc, char **argv)
 {
-
     sim::Simulator simulator;
 
     tue::Configuration config;

@@ -18,6 +18,11 @@
 #include <sensor_msgs/CameraInfo.h>
 #include <ros/node_handle.h>
 
+#include <ed/world_model.h>
+#include <ed/world_model/transform_crawler.h>
+#include <ed/uuid.h>
+#include <ed/entity.h>
+
 // ----------------------------------------------------------------------------------------------------
 
 class DepthSensorRenderResult : public geo::RenderResult {
@@ -121,7 +126,7 @@ void DepthSensorPlugin::configure(tue::Configuration config, const sim::LUId& ob
 
 // ----------------------------------------------------------------------------------------------------
 
-void DepthSensorPlugin::process(const sim::World& world, const sim::LUId& obj_id, double dt, sim::UpdateRequest& req)
+void DepthSensorPlugin::process(const ed::WorldModel& world, const sim::LUId& obj_id, double dt, ed::UpdateRequest& req)
 {
     // Get ROS current time
     ros::Time time = ros::Time::now();
@@ -136,37 +141,25 @@ void DepthSensorPlugin::process(const sim::World& world, const sim::LUId& obj_id
 
     if (render_depth_)
     {
-        // Calculate sensor pose in geolib frame
-//        geo::Pose3D geolib_pose = sensor_pose * geo::Pose3D(0, 0, 0, 3.1415, 0, 0);
-
-        std::cout << "----" << std::endl;
-
         depth_image = cv::Mat(depth_height_, depth_width_, CV_32FC1, 0.0);
-        for(std::vector<sim::ObjectConstPtr>::const_iterator it = world.objects().begin(); it != world.objects().end(); ++it)
+        for(ed::world_model::TransformCrawler tc(world, obj_id.id, world.latestTime()); tc.hasNext(); tc.next())
         {
-            const sim::ObjectConstPtr& obj = *it;
-            geo::ShapeConstPtr shape = obj->shape();
+            const ed::EntityConstPtr& e = tc.entity();
 
-            if (shape)
+            if (e->shape())
             {
-                geo::Pose3D rel_pose;
-                // Calculate pose of object relative to camera
-                if (world.getTransform(obj_id, obj->id(), rel_pose))
-                {
+                // Correction for geolib frame
+                geo::Pose3D rel_pose = geo::Pose3D(0, 0, 0, 3.1415, 0, 0) * tc.transform();
 
-                    std::cout << obj->id() << ": " << rel_pose << std::endl;
+                std::cout << e->id() << ": " << rel_pose << std::endl;
 
-                    // Correction for geolib frame
-                    rel_pose = geo::Pose3D(0, 0, 0, 3.1415, 0, 0) * rel_pose;
+                // Set render options
+                geo::RenderOptions opt;
+                opt.setMesh(e->shape()->getMesh(), rel_pose);
+                DepthSensorRenderResult res(depth_image, depth_width_, depth_height_);
 
-                    // Set render options
-                    geo::RenderOptions opt;
-                    opt.setMesh(shape->getMesh(), rel_pose);
-                    DepthSensorRenderResult res(depth_image, depth_width_, depth_height_);
-
-                    // Render
-                    depth_rasterizer_.render(opt, res);
-                }
+                // Render
+                depth_rasterizer_.render(opt, res);
             }
         }
     }

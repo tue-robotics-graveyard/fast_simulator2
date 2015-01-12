@@ -15,12 +15,15 @@
 #include <ed/update_request.h>
 #include <ed/relation.h>
 
+#include <ed/world_model.h>
+#include <ed/relations/transform_cache.h>
+
 namespace sim
 {
 
 // ----------------------------------------------------------------------------------------------------
 
-Simulator::Simulator() : world_(new World())
+Simulator::Simulator() : world_(new ed::WorldModel())
 {
 }
 
@@ -135,7 +138,7 @@ void Simulator::createObject(tue::Configuration config, UpdateRequest& req)
 
 // ----------------------------------------------------------------------------------------------------
 
-void Simulator::createObject(const LUId& parent_id, tue::Configuration config, UpdateRequest& req)
+void Simulator::createObject(const LUId& parent_id, tue::Configuration config, ed::UpdateRequest& req)
 {
     std::string id, type;
     if (!config.value("id", id) || !config.value("type", type))
@@ -164,59 +167,23 @@ void Simulator::createObject(const LUId& parent_id, tue::Configuration config, U
     {
         config = expandObjectConfig(models_, config);
 
-        // Add object
-        ObjectPtr e = boost::make_shared<Object>(id);
-        e->setType(type);
-        LUId obj_id = req.addObject(e);
+        std::cout << config << std::endl;
 
-        req.addTransform(parent_id, obj_id, pose);
+        // Add object and transform
+        req.setType(id, type);
+
+        // TODO: choose proper time
+        boost::shared_ptr<ed::TransformCache> t1(new ed::TransformCache());
+        t1->insert(ed::Time(-1), pose);
+        req.setRelation(parent_id.id, id, t1);
     }
     else
     {
-        ed::UpdateRequest update_request;
-        if (!ed::models::create(id, type, update_request))
+        if (!ed::models::create(id, type, req))
         {
             config.addError("Unknown object type: '" + type + "'.");
             return;
         }
-
-        // Add objects
-        for(std::map<ed::UUID, geo::ShapeConstPtr>::const_iterator it = update_request.shapes.begin(); it != update_request.shapes.end(); ++it)
-        {
-            ObjectPtr obj(new Object(it->first.str()));
-
-            // Set shape
-            obj->setShape(it->second);
-
-            // Set type
-            std::map<ed::UUID, std::string>::const_iterator it_type = update_request.types.find(it->first);
-            if (it_type != update_request.types.end())
-                obj->setType(it_type->second);
-
-            std::cout << "Adding object " << obj->id() << std::endl;
-
-            req.addObject(obj);
-        }
-
-        // Add relations
-        for(std::map<ed::UUID, std::map<ed::UUID, ed::RelationConstPtr> >::const_iterator it = update_request.relations.begin(); it != update_request.relations.end(); ++it)
-        {
-            const std::map<ed::UUID, ed::RelationConstPtr>& rels = it->second;
-            for(std::map<ed::UUID, ed::RelationConstPtr>::const_iterator it2 = rels.begin(); it2 != rels.end(); ++it2)
-            {
-                const ed::RelationConstPtr& r = it2->second;
-
-                geo::Pose3D rel_pose;
-                if (r->calculateTransform(ed::Time(0), rel_pose))
-                {
-                    req.addTransform(it->first.str(), it2->first.str(), rel_pose);
-
-                    std::cout << "Adding transform " << it->first << " - " << it2->first << ": " << rel_pose << std::endl;
-                }
-            }
-        }
-
-        req.addTransform(LUId("world"), id, pose);
     }
 
     tue::Configuration params;
@@ -264,7 +231,7 @@ void Simulator::createObject(const LUId& parent_id, tue::Configuration config, U
 
 void Simulator::configure(tue::Configuration config)
 {
-    UpdateRequest req;
+    ed::UpdateRequest req;
 
     if (config.readArray("models"))
     {
@@ -279,11 +246,14 @@ void Simulator::configure(tue::Configuration config)
         config.endArray();
     }
 
+    // set world root
+    req.setType("world", "root");
+
     if (config.readArray("objects"))
     {
         while (config.nextArrayItem())
         {
-            createObject(world_->rootId(), config, req);
+            createObject(LUId("world"), config, req);
         }
 
         config.endArray();
@@ -291,7 +261,7 @@ void Simulator::configure(tue::Configuration config)
 
     if (!req.empty())
     {
-        WorldPtr world_updated = boost::make_shared<World>(*world_);   // Create a world copy
+        ed::WorldModelPtr world_updated = boost::make_shared<ed::WorldModel>(*world_);   // Create a world copy
         world_updated->update(req);
         world_ = world_updated;
     }
@@ -301,7 +271,7 @@ void Simulator::configure(tue::Configuration config)
 
 void Simulator::step(double dt, std::vector<ObjectConstPtr>& changed_objects)
 {
-    WorldPtr world_updated;
+    ed::WorldModelPtr world_updated;
 
     // collect all update requests
     std::vector<PluginContainerPtr> plugins_with_requests;
@@ -312,21 +282,14 @@ void Simulator::step(double dt, std::vector<ObjectConstPtr>& changed_objects)
         if (c->updateRequest())
         {
             if (!world_updated)
-                world_updated = boost::make_shared<World>(*world_);   // Create a world copy
+                world_updated = boost::make_shared<ed::WorldModel>(*world_);   // Create a world copy
 
-            const UpdateRequestConstPtr& req = c->updateRequest();
-            if (!req->object_configs.empty())
+            const ed::UpdateRequestConstPtr& req = c->updateRequest();
+            if (req)
             {
-                UpdateRequest req2;
-                for(std::vector<tue::Configuration>::const_iterator it2 = req->object_configs.begin(); it2 != req->object_configs.end(); ++it2)
-                {
-                    createObject(*it2, req2);
-                }
-                world_updated->update(req2);
+                world_updated->update(*req);
+                plugins_with_requests.push_back(c);
             }
-
-            world_updated->update(*req);
-            plugins_with_requests.push_back(c);
         }
     }
 

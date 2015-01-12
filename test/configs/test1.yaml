@@ -13,9 +13,9 @@ models:
             width: 640
             height: 480
   - name: amigo
-    plugins:
-      - name: amigo-ros_robot
-        lib: /home/sdries/ros/hydro/dev/devel/lib/libsim_ros_robot.so
+#    plugins:
+#      - name: amigo-ros_robot
+#        lib: /home/sdries/ros/hydro/dev/devel/lib/libsim_ros_robot.so
     parameters:
         urdf: /home/sdries/ros/hydro/system/src/amigo_description/urdf/amigo.urdf
         sensors:

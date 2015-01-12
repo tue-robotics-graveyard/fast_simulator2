@@ -17,7 +17,7 @@ public:
 
     void configure(tue::Configuration config, const sim::LUId& obj_id);
 
-    void process(const sim::World& world, const sim::LUId& obj_id, double dt, sim::UpdateRequest& req);
+    void process(const ed::WorldModel& world, const sim::LUId& obj_id, double dt, ed::UpdateRequest& req);
 
 private:
 

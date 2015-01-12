@@ -4,9 +4,10 @@
 #include <class_loader/class_loader.h>
 #define SIM_REGISTER_PLUGIN(Derived) CLASS_LOADER_REGISTER_CLASS(Derived, sim::Plugin)
 
-#include "types.h"
+#include "fast_simulator2/types.h"
 
 #include <tue/config/configuration.h>
+#include <ed/types.h>
 
 namespace sim
 {
@@ -24,9 +25,9 @@ public:
 
     virtual void initialize() {}
 
-    virtual void process(const World& world, double dt, UpdateRequest& req) {}
+    virtual void process(const ed::WorldModel& world, double dt, ed::UpdateRequest& req) {}
 
-    virtual void process(const World& world, const LUId& obj_id, double dt, UpdateRequest& req) {}
+    virtual void process(const ed::WorldModel& world, const LUId& obj_id, double dt, ed::UpdateRequest& req) {}
 
     const std::string& name() const { return name_; }
 

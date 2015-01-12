@@ -4,6 +4,9 @@
 #include <fast_simulator2/object.h>
 #include <fast_simulator2/update_request.h>
 
+#include <ed/world_model.h>
+#include <ed/uuid.h>
+
 // ----------------------------------------------------------------------------------------------------
 
 BaseController::BaseController()
@@ -19,12 +22,12 @@ void BaseController::configure(tue::Configuration config, const sim::LUId& obj_i
 
 // ----------------------------------------------------------------------------------------------------
 
-void BaseController::process(const sim::World& world, const sim::LUId& obj_id, double dt, sim::UpdateRequest& req)
+void BaseController::process(const ed::WorldModel& world, const sim::LUId& obj_id, double dt, ed::UpdateRequest& req)
 {
     std::cout << "BaseController::process (" << obj_id.id << ")" << std::endl;
 
     geo::Pose3D t;
-    if (world.getTransform(obj_id, world.rootId(), t))
+    if (world.calculateTransform(ed::UUID(obj_id.id), "world", world.latestTime(), t))
     {
         std::cout << t << std::endl;
     }
