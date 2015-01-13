@@ -138,11 +138,15 @@ void Simulator::createObject(tue::Configuration config, UpdateRequest& req)
 
 // ----------------------------------------------------------------------------------------------------
 
-void Simulator::createObject(const LUId& parent_id, tue::Configuration config, ed::UpdateRequest& req)
+void Simulator::createObject(LUId parent_id, tue::Configuration config, ed::UpdateRequest& req)
 {
     std::string id, type;
     if (!config.value("id", id) || !config.value("type", type))
         return;
+
+    // Optionally set another parent
+    if (config.value("parent", parent_id.id, tue::OPTIONAL))
+        req.setType(parent_id.id, "_UNKNOWN_");
 
     geo::Pose3D pose = geo::Pose3D::identity();
     if (config.readGroup("pose", tue::REQUIRED))
@@ -167,27 +171,25 @@ void Simulator::createObject(const LUId& parent_id, tue::Configuration config, e
     {
         config = expandObjectConfig(models_, config);
 
-        std::cout << config << std::endl;
-
         // Add object and transform
         req.setType(id, type);
-
-        // TODO: choose proper time
-        boost::shared_ptr<ed::TransformCache> t1(new ed::TransformCache());
-        t1->insert(ed::Time(-1), pose);
-        req.setRelation(parent_id.id, id, t1);
     }
     else
     {
-        if (!ed::models::create(id, type, req))
+        if (!ed::models::create(config.data(), req))
         {
             config.addError("Unknown object type: '" + type + "'.");
             return;
         }
     }
 
+    // Add relation from parent to child
+    boost::shared_ptr<ed::TransformCache> t1(new ed::TransformCache());
+    t1->insert(ed::Time(-1), pose);  // TODO: choose proper time
+    req.setRelation(parent_id.id, id, t1);
+
     tue::Configuration params;
-    if (config.readGroup("parameters"))
+    if (config.readGroup("properties"))
     {
         params = config;
         config.endGroup();
@@ -217,7 +219,7 @@ void Simulator::createObject(const LUId& parent_id, tue::Configuration config, e
     }
 
     //  Composition
-    if (config.readArray("children"))
+    if (config.readArray("objects"))
     {
         while(config.nextArrayItem())
         {

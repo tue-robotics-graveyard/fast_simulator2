@@ -48,7 +48,7 @@ private:
 
     void createObject(tue::Configuration config, UpdateRequest& req);
 
-    void createObject(const LUId& parent_id, tue::Configuration config, ed::UpdateRequest& req);
+    void createObject(LUId parent_id, tue::Configuration config, ed::UpdateRequest& req);
 
 };
 

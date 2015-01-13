@@ -96,6 +96,6 @@ target_link_libraries(sim_base_controller fast_simulator2)
 add_library(sim_depth_sensor plugins/depth_sensor_plugin.cpp)
 target_link_libraries(sim_depth_sensor fast_simulator2)
 
-#add_library(sim_ros_robot plugins/ros_robot_plugin.cpp)
-#target_link_libraries(sim_ros_robot fast_simulator2)
+add_library(sim_ros_robot plugins/ros_robot_plugin.cpp)
+target_link_libraries(sim_ros_robot fast_simulator2)
 

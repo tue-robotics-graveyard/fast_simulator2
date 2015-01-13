@@ -3,7 +3,7 @@ models:
     plugins:
       - name: kinect_depth_sensor
         lib: /home/sdries/ros/hydro/dev/devel/lib/libsim_depth_sensor.so 
-    parameters:
+    properties:
         depth:
             width: 640
             height: 480
@@ -13,34 +13,35 @@ models:
             width: 640
             height: 480
   - name: amigo
-#    plugins:
-#      - name: amigo-ros_robot
-#        lib: /home/sdries/ros/hydro/dev/devel/lib/libsim_ros_robot.so
-    parameters:
+    plugins:
+      - name: amigo-ros_robot
+        lib: /home/sdries/ros/hydro/dev/devel/lib/libsim_ros_robot.so
+    properties:
         urdf: /home/sdries/ros/hydro/system/src/amigo_description/urdf/amigo.urdf
-        sensors:
-          - id: top_kinect
-            type: kinect
-            link: top_kinect/openni_rgb_optical_frame
-            parameters:
-                topics:
-                  - rgb: /amigo/top_kinect/rgb/image_color
-                  - rgb: /amigo/top_kinect/rgb/image_color_rect
-                  - rgb_info: /amigo/top_kinect/rgb/camera_info
-                  - depth: /amigo/top_kinect/depth_registred/image
-                  - depth: /amigo/top_kinect/depth_registred/image_rect
-                  - depth_info: /amigo/top_kinect/depth_registered/camera_info
-                  - rgbd: /amigo/top_kinect/rgbd
-                frame_id: /amigo/top_kinect/openni_rgb_optical_frame  
+    objects:
+      - id: top_kinect
+        type: kinect
+        parent: amigo/top_kinect/openni_rgb_optical_frame
+        pose: {x: 0, y: 0, z: 0}
+        properties:
+            topics:
+              - rgb: /amigo/top_kinect/rgb/image_color
+              - rgb: /amigo/top_kinect/rgb/image_color_rect
+              - rgb_info: /amigo/top_kinect/rgb/camera_info
+              - depth: /amigo/top_kinect/depth_registred/image
+              - depth: /amigo/top_kinect/depth_registred/image_rect
+              - depth_info: /amigo/top_kinect/depth_registered/camera_info
+              - rgbd: /amigo/top_kinect/rgbd
+            frame_id: /amigo/top_kinect/openni_rgb_optical_frame  
 
 objects:
   - id: lab
-    type: robotics_testlab_B
+    type: robotics_testlab_B.walls
     pose: {x: 0, y: 0, z: 0, yaw: 0} 
   - id: amigo
     type: amigo
     pose: {x: 0, y: 0, z: 0, yaw: 0}
-    parameters:
+    properties:
         joints:
           - name: torso_joint
             position: 0.4
@@ -48,4 +49,3 @@ objects:
             position: 0
           - name: neck_tilt_joint
             position: 0
-

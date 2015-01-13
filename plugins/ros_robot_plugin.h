@@ -5,7 +5,6 @@
 
 #include <kdl/tree.hpp>
 #include <ed/update_request.h>
-#include <ed/time_cache.h>
 #include <ed/relation.h>
 
 // ----------------------------------------------------------------------------------------------------
@@ -17,23 +16,18 @@ public:
 
     JointRelation(const KDL::Segment& segment) : segment_(segment) {}
 
-    ed::Time latestTime() const { return joint_pos_cache_.latestTime(); }
+    ed::Time latestTime() const { return ed::Time(0); }  // TODO
 
     bool calculateTransform(const ed::Time& t, geo::Pose3D& tf) const;
 
-    void insert(const ed::Time& t, float joint_pos) { joint_pos_cache_.insert(t, joint_pos); }
-
-    inline unsigned int size() const { return joint_pos_cache_.size(); }
-
-    void setCacheSize(unsigned int n) { joint_pos_cache_.setMaxSize(n); }
+    void setJointPosition(float joint_pos) { joint_pos_ = joint_pos; }
 
 private:
 
-    ed::TimeCache<float> joint_pos_cache_;
+    float joint_pos_;
     KDL::Segment segment_; // calculates the joint pose
 
 };
-
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -42,7 +36,7 @@ struct RelationInfo
     ed::UUID parent_id;
     ed::UUID child_id;
     ed::Idx r_idx;
-    boost::shared_ptr<const JointRelation> last_rel;
+    boost::shared_ptr<const JointRelation> relation;
 };
 
 // ----------------------------------------------------------------------------------------------------
@@ -66,12 +60,11 @@ private:
 
     KDL::Tree tree_;
 
-    unsigned int joint_cache_size_;
 
     /// Joint positions
     std::map<std::string, RelationInfo> joint_name_to_rel_info_;
 
-    bool updateJoint(const std::string& name, double pos, sim::UpdateRequest& req);
+    bool updateJoint(const std::string& name, double pos, ed::UpdateRequest& req);
 
     void constructRobot(const ed::UUID& parent_id, const KDL::SegmentMap::const_iterator& it_segment, ed::UpdateRequest& req);
 
