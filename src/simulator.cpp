@@ -101,7 +101,7 @@ void Simulator::createObject(LUId parent_id, tue::Configuration config, ed::Upda
     }
     else
     {
-        if (!ed::models::create(config.data(), req))
+        if (!model_loader_.create(config.data(), req))
         {
             config.addError("Unknown object type: '" + type + "'.");
             return;

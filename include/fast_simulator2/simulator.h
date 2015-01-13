@@ -4,6 +4,7 @@
 #include "fast_simulator2/types.h"
 
 #include <ed/types.h>
+#include <ed/models/model_loader.h>
 
 #include <vector>
 #include <map>
@@ -33,10 +34,6 @@ public:
 
 private:
 
-//    RobotPtr robot_;
-
-//    WorldConstPtr world_;
-
     ed::WorldModelConstPtr world_;
 
     //! Plugins
@@ -46,7 +43,7 @@ private:
     // Models
     std::map<std::string, std::string> models_;
 
-//    void createObject(tue::Configuration config, UpdateRequest& req);
+    ed::models::ModelLoader model_loader_;
 
     void createObject(LUId parent_id, tue::Configuration config, ed::UpdateRequest& req);
 
