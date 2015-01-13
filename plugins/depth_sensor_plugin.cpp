@@ -151,8 +151,6 @@ void DepthSensorPlugin::process(const ed::WorldModel& world, const sim::LUId& ob
                 // Correction for geolib frame
                 geo::Pose3D rel_pose = geo::Pose3D(0, 0, 0, 3.1415, 0, 0) * tc.transform();
 
-                std::cout << e->id() << ": " << rel_pose << std::endl;
-
                 // Set render options
                 geo::RenderOptions opt;
                 opt.setMesh(e->shape()->getMesh(), rel_pose);

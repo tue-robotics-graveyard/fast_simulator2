@@ -36,11 +36,11 @@ models:
 
 objects:
   - id: lab
-    type: robotics_testlab_B.walls
+    type: robotics_testlab_B
     pose: {x: 0, y: 0, z: 0, yaw: 0} 
   - id: amigo
     type: amigo
-    pose: {x: 0, y: 0, z: 0, yaw: 0}
+    pose: {x: 3.15, y: 1, z: 0, yaw: -1.56}
     properties:
         joints:
           - name: torso_joint
@@ -48,4 +48,4 @@ objects:
           - name: neck_pan_joint
             position: 0
           - name: neck_tilt_joint
-            position: 0
+            position: 0.5
