@@ -7,6 +7,9 @@
 #include <fstream>
 #include <sstream>
 
+// Finding ros packages
+#include <ros/package.h>
+
 // ----------------------------------------------------------------------------------------------------
 
 bool JointRelation::calculateTransform(const ed::Time& t, geo::Pose3D& tf) const
@@ -21,6 +24,140 @@ bool JointRelation::calculateTransform(const ed::Time& t, geo::Pose3D& tf) const
     return true;
 }
 
+// ----------------------------------------------------------------------------------------------------
+//
+//                                   RESOLVE FUNCTION PARSING
+//
+// ----------------------------------------------------------------------------------------------------
+
+bool executeResolvefunction(const std::vector<std::string>& args, std::string& result, std::stringstream& error)
+{
+    if (args[0] == "rospkg" && args.size() == 2)
+    {
+        result = ros::package::getPath(args[1]);
+        if (result.empty())
+        {
+            error << "ROS package '" << args[1] << "' unknown.";
+            return false;
+        }
+
+        return true;
+    }
+    else if (args[0] == "env" && (args.size() == 2 || args.size() == 3))
+    {
+        char* env_value;
+        env_value = getenv(args[1].c_str());
+        if (env_value == 0)
+        {
+            if (args.size() == 3)
+            {
+                // Default value
+                result = args[2];
+                return true;
+            }
+
+            error << "Environment variable '" << args[1] << "' unknown.";
+            return false;
+        }
+
+        result = env_value;
+        return true;
+    }
+
+    error << "Unknown resolve function: '" << args[0] << "' with " << args.size() - 1 << " arguments.";
+
+    return false;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+bool parseResolveFunction(const std::string& str, std::size_t& i, std::string& result, std::stringstream& error)
+{
+    std::vector<std::string> args;
+    args.push_back("");
+
+    for(; i < str.size();)
+    {
+        char c = str[i];
+
+        if (c == '$' && (i + 1) < str.size() && str[i + 1] == '(')
+        {
+            // Skip "$("
+            i += 2;
+
+            std::string arg;
+            if (!parseResolveFunction(str, i, arg, error))
+                return false;
+
+            args.back() += arg;
+            continue;
+        }
+        else if (c == ')')
+        {
+            ++i;
+
+            // Check if last argument is empty. If so, remove it
+            if (args.back().empty())
+                args.pop_back();
+
+            // Check if args are empty. Is so, return false
+            if (args.empty())
+            {
+                error << "Empty resolve function.";
+                return false;
+            }
+
+            return executeResolvefunction(args, result, error);
+        }
+        else if (c == ' ')
+        {
+            if (!args.back().empty())
+                args.push_back("");
+            ++i;
+        }
+        else
+        {
+            args.back() += c;
+            ++i;
+        }
+    }
+
+    error << "Missing ')'.";
+    return false;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+bool resolve(const std::string& str, std::string& result, std::stringstream& error)
+{
+    std::size_t i = 0;
+
+    while(i < str.size())
+    {
+        std::size_t i_sign = str.find("$(", i);
+        if (i_sign == std::string::npos)
+        {
+            result += str.substr(i);
+            return true;
+        }
+
+        result += str.substr(i, i_sign - i);
+
+        // Skip until after "$("
+        i = i_sign + 2;
+
+        std::string subresult;
+        if (!parseResolveFunction(str, i, subresult, error))
+            return false;
+
+        result += subresult;
+    }
+
+    error << "Missing ')'.";
+    return false;
+}
+
+// ----------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------
 
 void ROSRobotPlugin::constructRobot(const ed::UUID& parent_id, const KDL::SegmentMap::const_iterator& it_segment, ed::UpdateRequest& req)
@@ -66,11 +203,19 @@ void ROSRobotPlugin::configure(tue::Configuration config, const sim::LUId& obj_i
     std::string urdf_file;
     if (config.value("urdf", urdf_file))
     {
-        std::ifstream f(urdf_file.c_str());
+        std::string urdf_file_resolved;
+        std::stringstream resolve_error;
+        if (!resolve(urdf_file, urdf_file_resolved, resolve_error))
+        {
+            config.addError("Could not resolve 'urdf' value '" + urdf_file + "': " + resolve_error.str());
+            return;
+        }
+
+        std::ifstream f(urdf_file_resolved.c_str());
 
         if (!f.is_open())
         {
-            config.addError("Could not load URDF description. File not found: '" + urdf_file + "'.");
+            config.addError("Could not load URDF description. File not found: '" + urdf_file_resolved + "'.");
             return;
         }
 
@@ -90,7 +235,6 @@ void ROSRobotPlugin::configure(tue::Configuration config, const sim::LUId& obj_i
         {
             config.addError("Could not initialize tree object");
             return;
-
         }
 
         constructRobot(obj_id.id, tree_.getRootSegment(), init_update_request_);

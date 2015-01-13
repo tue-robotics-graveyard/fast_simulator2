@@ -17,7 +17,7 @@ models:
       - name: amigo-ros_robot
         lib: /home/sdries/ros/hydro/dev/devel/lib/libsim_ros_robot.so
     properties:
-        urdf: /home/sdries/ros/hydro/system/src/amigo_description/urdf/amigo.urdf
+        urdf: $(rospkg amigo_description)/urdf/amigo.urdf
     objects:
       - id: top_kinect
         type: kinect
