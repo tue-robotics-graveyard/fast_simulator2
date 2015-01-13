@@ -4,8 +4,8 @@
 
 #include <iostream>
 
-#include <fast_simulator2/id_map.h>
-#include <fast_simulator2/object.h>
+//#include <fast_simulator2/id_map.h>
+//#include <fast_simulator2/object.h>
 #include <sstream>
 
 #include <tue/profiling/timer.h>
@@ -49,8 +49,7 @@ int main(int argc, char **argv)
         }
 
         // Step the simulator
-        std::vector<sim::ObjectConstPtr> changed_objects;
-        simulator.step(0.01, changed_objects);
+        simulator.step(0.01);
 
         usleep(10000);
     }

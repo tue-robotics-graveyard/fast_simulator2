@@ -1,9 +1,5 @@
 #include "fast_simulator2/simulator.h"
 
-#include "fast_simulator2/world.h"
-#include "fast_simulator2/object.h"
-#include "fast_simulator2/update_request.h"
-
 // Plugin loading
 #include "fast_simulator2/plugin.h"
 #include "plugin_container.h"
@@ -40,27 +36,6 @@ Simulator::~Simulator()
 
 // ----------------------------------------------------------------------------------------------------
 
-//void addObjectRecursive(UpdateRequest& req, const ed::models::NewEntityConstPtr& e, const geo::Pose3D& pose)
-//{
-//    if (e->shape)
-//    {
-//        ObjectPtr obj(new Object(e->id));
-//        obj->setType(e->id);
-//        obj->setShape(e->shape);
-
-
-//        req.addObject(obj);
-//        req.addTransform(LUId("world"), obj->id(), pose * e->pose);
-//    }
-
-//    for(std::vector<ed::models::NewEntityPtr>::const_iterator it = e->children.begin(); it != e->children.end(); ++it)
-//    {
-//        addObjectRecursive(req, *it, pose * e->pose);
-//    }
-//}
-
-// ----------------------------------------------------------------------------------------------------
-
 tue::Configuration expandObjectConfig(const std::map<std::string, std::string>& models, tue::Configuration config)
 {
     std::string type;
@@ -83,56 +58,6 @@ tue::Configuration expandObjectConfig(const std::map<std::string, std::string>& 
     else
     {
         return config;
-    }
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-void Simulator::createObject(tue::Configuration config, UpdateRequest& req)
-{
-    std::string id, type;
-    if (!config.value("id", id) || !config.value("type", type))
-        return;
-
-    std::map<std::string, std::string>::const_iterator it = models_.find(type);
-    if (it != models_.end())
-    {
-        config = expandObjectConfig(models_, config);
-
-        // Add object
-        ObjectPtr e = boost::make_shared<Object>(id);
-        e->setType(type);
-        req.addObject(e);
-    }
-
-    tue::Configuration params;
-    if (config.readGroup("parameters"))
-    {
-        params = config;
-        config.endGroup();
-    }
-
-    if (config.readArray("plugins"))
-    {
-        while (config.nextArrayItem())
-        {
-            std::string name, lib_filename;
-            if (config.value("name", name) & config.value("lib", lib_filename))
-            {
-                tue::Configuration plugin_cfg;
-                plugin_cfg.setValue("_object", id);
-                plugin_cfg.data().add(params.data());
-
-                std::string load_error;
-                loadPlugin(name, lib_filename, plugin_cfg, load_error);
-
-                if (!load_error.empty())
-                {
-                    config.addError(load_error);
-                }
-            }
-        }
-        config.endArray();
     }
 }
 
@@ -271,7 +196,7 @@ void Simulator::configure(tue::Configuration config)
 
 // ----------------------------------------------------------------------------------------------------
 
-void Simulator::step(double dt, std::vector<ObjectConstPtr>& changed_objects)
+void Simulator::step(double dt)
 {
     ed::WorldModelPtr world_updated;
 
@@ -352,6 +277,5 @@ PluginContainerPtr Simulator::loadPlugin(const std::string plugin_name, const st
 
     return PluginContainerPtr();
 }
-
 
 }

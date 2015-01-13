@@ -62,21 +62,12 @@ include_directories(
 set(HEADER_FILES
     include/fast_simulator2/simulator.h
     include/fast_simulator2/types.h
-    include/fast_simulator2/world.h
     include/fast_simulator2/plugin.h
-    include/fast_simulator2/object.h
-    include/fast_simulator2/update_request.h
-    include/fast_simulator2/id_map.h
 )
-
 
 add_library(fast_simulator2
     src/simulator.cpp
-    src/object.cpp
-    src/laser_range_finder.cpp
-    src/world.cpp
     src/plugin_container.cpp
-    src/update_request.cpp
     ${HEADER_FILES}
 )
 target_link_libraries(fast_simulator2 ${catkin_LIBRARIES})

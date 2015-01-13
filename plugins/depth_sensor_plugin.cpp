@@ -1,9 +1,6 @@
 #include "depth_sensor_plugin.h"
 
-#include "fast_simulator2/world.h"
-
 #include <geolib/Shape.h>
-#include <geolib/Box.h>
 
 #include <opencv2/highgui/highgui.hpp>
 

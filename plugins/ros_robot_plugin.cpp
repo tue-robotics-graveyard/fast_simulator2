@@ -7,9 +7,6 @@
 #include <fstream>
 #include <sstream>
 
-#include <fast_simulator2/object.h>
-#include <fast_simulator2/world.h>
-
 // ----------------------------------------------------------------------------------------------------
 
 bool JointRelation::calculateTransform(const ed::Time& t, geo::Pose3D& tf) const
@@ -137,20 +134,6 @@ bool ROSRobotPlugin::updateJoint(const std::string& name, double pos, ed::Update
 
 // ----------------------------------------------------------------------------------------------------
 
-void printTransformTree(const sim::World& world, const sim::LUId& obj_id, const std::string& indent = "")
-{
-    const sim::ObjectConstPtr& obj = world.object(obj_id);
-
-    std::cout << indent << obj_id.id << std::endl;
-
-    for(std::map<sim::LUId, sim::LUId>::const_iterator it = obj->transforms().begin(); it != obj->transforms().end(); ++it)
-    {
-        printTransformTree(world, it->first, indent + "  ");
-    }
-}
-
-// ----------------------------------------------------------------------------------------------------
-
 void ROSRobotPlugin::process(const ed::WorldModel& world, const sim::LUId& obj_id, double dt, ed::UpdateRequest& req)
 {
     if (!init_update_request_.empty())
@@ -163,15 +146,6 @@ void ROSRobotPlugin::process(const ed::WorldModel& world, const sim::LUId& obj_i
 
         return;
     }
-
-//    printTransformTree(world, world.rootId());
-
-
-//    geo::Pose3D p;
-//    if (world.getTransform(sim::LUId("amigo/hand_right"), sim::LUId("amigo/base_link"), p))
-//    {
-//        std::cout << p << std::endl;
-//    }
 }
 
 SIM_REGISTER_PLUGIN(ROSRobotPlugin)

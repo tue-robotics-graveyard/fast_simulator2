@@ -1,9 +1,5 @@
 #include "base_controller.h"
 
-#include <fast_simulator2/world.h>
-#include <fast_simulator2/object.h>
-#include <fast_simulator2/update_request.h>
-
 #include <ed/world_model.h>
 #include <ed/uuid.h>
 

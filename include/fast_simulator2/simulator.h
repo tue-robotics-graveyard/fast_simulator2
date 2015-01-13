@@ -24,7 +24,7 @@ public:
 
     void configure(tue::Configuration config);
 
-    void step(double dt, std::vector<ObjectConstPtr>& changed_objects);
+    void step(double dt);
 
     PluginContainerPtr loadPlugin(const std::string plugin_name, const std::string& lib_filename,
                                   tue::Configuration config, std::string& error);
@@ -33,7 +33,7 @@ public:
 
 private:
 
-    RobotPtr robot_;
+//    RobotPtr robot_;
 
 //    WorldConstPtr world_;
 
@@ -46,7 +46,7 @@ private:
     // Models
     std::map<std::string, std::string> models_;
 
-    void createObject(tue::Configuration config, UpdateRequest& req);
+//    void createObject(tue::Configuration config, UpdateRequest& req);
 
     void createObject(LUId parent_id, tue::Configuration config, ed::UpdateRequest& req);
 

@@ -11,21 +11,21 @@ namespace sim
 
 typedef std::string UUId;
 
-class Object;
-typedef boost::shared_ptr<Object> ObjectPtr;
-typedef boost::shared_ptr<const Object> ObjectConstPtr;
+//class Object;
+//typedef boost::shared_ptr<Object> ObjectPtr;
+//typedef boost::shared_ptr<const Object> ObjectConstPtr;
 
-class Robot;
-typedef boost::shared_ptr<Robot> RobotPtr;
-typedef boost::shared_ptr<const Robot> RobotConstPtr;
+//class Robot;
+//typedef boost::shared_ptr<Robot> RobotPtr;
+//typedef boost::shared_ptr<const Robot> RobotConstPtr;
 
-class World;
-typedef boost::shared_ptr<World> WorldPtr;
-typedef boost::shared_ptr<const World> WorldConstPtr;
+//class World;
+//typedef boost::shared_ptr<World> WorldPtr;
+//typedef boost::shared_ptr<const World> WorldConstPtr;
 
-class UpdateRequest;
-typedef boost::shared_ptr<UpdateRequest> UpdateRequestPtr;
-typedef boost::shared_ptr<const UpdateRequest> UpdateRequestConstPtr;
+//class UpdateRequest;
+//typedef boost::shared_ptr<UpdateRequest> UpdateRequestPtr;
+//typedef boost::shared_ptr<const UpdateRequest> UpdateRequestConstPtr;
 
 class Plugin;
 typedef boost::shared_ptr<Plugin> PluginPtr;

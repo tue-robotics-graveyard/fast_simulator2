@@ -1,7 +1,7 @@
 #include "plugin_container.h"
 
-#include "fast_simulator2/update_request.h"
-#include "fast_simulator2/world.h"
+//#include "fast_simulator2/update_request.h"
+//#include "fast_simulator2/world.h"
 
 #include <ed/update_request.h>
 
