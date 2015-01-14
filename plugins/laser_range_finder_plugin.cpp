@@ -50,6 +50,10 @@ void LaserRangeFinderPlugin::configure(tue::Configuration config, const sim::LUI
     lrf_.setAngleLimits(min_angle, max_angle);
     lrf_.setRangeLimits(min_range, max_range);
 
+    // Make sure ROS is initialized
+    if (!ros::isInitialized())
+         ros::init(ros::M_string(), "simulator", ros::init_options::NoSigintHandler);
+
     // Set-up communication (ROS publisher)
     std::string topic, frame_id;
     if (config.value("topic", topic) & config.value("frame_id", frame_id))
@@ -96,6 +100,9 @@ void LaserRangeFinderPlugin::process(const ed::WorldModel& world, const sim::LUI
     // Copy ranges to scan message
     for(unsigned int i = 0; i < ranges.size(); ++i)
         scan_.ranges[i] = ranges[i];
+
+    // Stamp with current ROS time
+    scan_.header.stamp = ros::Time::now();
 
     pub_.publish(scan_);
 }

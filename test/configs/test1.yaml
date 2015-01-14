@@ -52,7 +52,7 @@ models:
         pose: {x: 0, y: 0, z: 0}
         properties:
             topic: /amigo/base_front_laser
-            frame_id: /amigo/base_laser
+            frame_id: /amigo/base_laser            
       - id: torso_lrf
         type: laser_range_finder
         parent: amigo/torso_laser
@@ -67,7 +67,7 @@ objects:
     pose: {x: 0, y: 0, z: 0, yaw: 0}
   - id: amigo
     type: amigo
-    pose: {x: 3.15, y: 1, z: 0, yaw: -1.56}
+    pose: {x: 3.15, y: 2., z: 0, yaw: -1.56}
     properties:
         joints:
           - name: torso_joint

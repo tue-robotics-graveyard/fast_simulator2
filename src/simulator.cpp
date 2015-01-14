@@ -131,15 +131,15 @@ void Simulator::createObject(LUId parent_id, tue::Configuration config, ed::Upda
     {
         while (config.nextArrayItem())
         {
-            std::string name, lib_filename;
-            if (config.value("name", name) & config.value("lib", lib_filename))
+            std::string lib_filename;
+            if (config.value("lib", lib_filename))
             {
                 tue::Configuration plugin_cfg;
                 plugin_cfg.setValue("_object", id);
                 plugin_cfg.data().add(params.data());
 
                 std::string load_error;
-                loadPlugin(name, lib_filename, plugin_cfg, load_error);
+                loadPlugin(id + "-" + lib_filename, lib_filename, plugin_cfg, load_error);
 
                 if (!load_error.empty())
                 {
