@@ -65,6 +65,12 @@ tue::Configuration expandObjectConfig(const std::map<std::string, std::string>& 
 
 void Simulator::createObject(LUId parent_id, tue::Configuration config, ed::UpdateRequest& req)
 {
+    // Check for the 'enabled' field. If it exists and the value is 0, omit this object. This allows
+    // the user to easily enable and disable certain objects with one single flag.
+    int enabled;
+    if (config.value("enabled", enabled, tue::OPTIONAL) && !enabled)
+        return;
+
     std::string id, type;
     if (!config.value("id", id) || !config.value("type", type))
         return;
