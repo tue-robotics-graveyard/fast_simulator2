@@ -94,7 +94,8 @@ void Simulator::createObject(LUId parent_id, tue::Configuration config, ed::Upda
     std::map<std::string, std::string>::const_iterator it = models_.find(type);
     if (it != models_.end())
     {
-        config = expandObjectConfig(models_, config);
+        tue::Configuration expanded_config = expandObjectConfig(models_, config);
+        config.data().add(expanded_config.data());
 
         // Add object and transform
         req.setType(id, type);
@@ -263,7 +264,7 @@ PluginContainerPtr Simulator::loadPlugin(const std::string plugin_name, const st
 
     if (!tue::filesystem::Path(full_lib_file).exists())
     {
-        error += "Could not find plugin '" + full_lib_file + "'.";
+        error += "Could not find library '" + full_lib_file + "'.";
         return PluginContainerPtr();
     }
 
