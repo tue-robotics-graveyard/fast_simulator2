@@ -12,17 +12,35 @@
 
 int main(int argc, char **argv)
 {
+    if (argc != 2)
+    {
+        std::cout << "[Fast Simulator 2] Please provide configuration file." << std::endl;
+        return 1;
+    }
+
+    std::string config_filename = argv[1];
+
     sim::Simulator simulator;
 
-    tue::Configuration config;
+    // - - - - - - - - - - - - - - - configure - - - - - - - - - - - - - - -
 
-    std::string config_filename;
-    if (argc == 2)
-        config_filename = argv[1];
-    else
-        config_filename = "/home/sdries/ros/hydro/dev/src/fast_simulator2/test/configs/test1.yaml";
+    // Get plugin paths
+    const char* sim_plugin_path = ::getenv("SIM_PLUGIN_PATH");
+    if (sim_plugin_path == 0)
+    {
+        std::cout << "Error: Environment variable SIM_PLUGIN_PATH not set." << std::endl;
+        return 1;
+    }
+
+    std::stringstream ss(sim_plugin_path);
+    std::string item;
+    while (std::getline(ss, item, ':'))
+        simulator.addPluginPath(item);
+
+    // - - - - - - - - - - - - - -
 
     // Load the YAML config file
+    tue::Configuration config;
     config.loadFromYAMLFile(config_filename);
     simulator.configure(config);
 
@@ -32,6 +50,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     while(true)
     {

@@ -32,6 +32,8 @@ public:
 
     const ed::WorldModelConstPtr& world() const { return world_; }
 
+    void addPluginPath(const std::string& path) { plugin_paths_.push_back(path); }
+
 private:
 
     ed::WorldModelConstPtr world_;
@@ -46,6 +48,8 @@ private:
     ed::models::ModelLoader model_loader_;
 
     void createObject(LUId parent_id, tue::Configuration config, ed::UpdateRequest& req);
+
+    std::string getFullLibraryPath(const std::string& lib);
 
 };
 

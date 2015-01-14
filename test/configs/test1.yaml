@@ -2,7 +2,7 @@ models:
   - name: kinect
     plugins:
       - name: kinect_depth_sensor
-        lib: /home/sdries/ros/hydro/dev/devel/lib/libsim_depth_sensor.so 
+        lib: libsim_depth_sensor.so 
     properties:
         depth:
             width: 640
@@ -15,7 +15,7 @@ models:
   - name: amigo
     plugins:
       - name: amigo-ros_robot
-        lib: /home/sdries/ros/hydro/dev/devel/lib/libsim_ros_robot.so
+        lib: libsim_ros_robot.so
     properties:
         urdf: $(rospkg amigo_description)/urdf/amigo.urdf
     objects:

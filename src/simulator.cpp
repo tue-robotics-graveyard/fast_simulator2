@@ -241,6 +241,28 @@ void Simulator::step(double dt)
 
 // ----------------------------------------------------------------------------------------------------
 
+std::string Simulator::getFullLibraryPath(const std::string& lib)
+{
+    if (!lib.empty() && lib[0] == '/')
+    {
+        if (!tue::filesystem::Path(lib).exists())
+            return "";
+
+        return lib;
+    }
+
+    for(std::vector<std::string>::const_iterator it = plugin_paths_.begin(); it != plugin_paths_.end(); ++it)
+    {
+        std::string lib_file_test = *it + "/" + lib;
+        if (tue::filesystem::Path(lib_file_test).exists())
+            return lib_file_test;
+    }
+
+    return "";
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 PluginContainerPtr Simulator::loadPlugin(const std::string plugin_name, const std::string& lib_filename,
                                          tue::Configuration config, std::string& error)
 {
@@ -250,26 +272,16 @@ PluginContainerPtr Simulator::loadPlugin(const std::string plugin_name, const st
         return PluginContainerPtr();
     }
 
-    std::string full_lib_file = lib_filename;
-    //        if (lib_filename[0] != '/')
-    //        {
-    //            // library file is relative
-    //            full_lib_file = getFullLibraryPath(lib_filename);
-    //            if (full_lib_file.empty())
-    //            {
-    //                error += "Could not find plugin '" + lib_filename + "'.";
-    //                return PluginContainerPtr();
-    //            }
-    //        }
+    std::string full_lib_file = getFullLibraryPath(lib_filename);
 
-    if (!tue::filesystem::Path(full_lib_file).exists())
+    if (full_lib_file.empty())
     {
-        error += "Could not find library '" + full_lib_file + "'.";
+        error += "Could not find library '" + lib_filename + "'.";
         return PluginContainerPtr();
     }
 
     PluginContainerPtr container(new PluginContainer());
-    if (container->loadPlugin(plugin_name, lib_filename, config, error))
+    if (container->loadPlugin(plugin_name, full_lib_file, config, error))
     {
         plugin_containers_[plugin_name] = container;
         container->runThreaded();
