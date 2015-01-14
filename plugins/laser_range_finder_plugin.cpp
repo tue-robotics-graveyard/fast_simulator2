@@ -80,8 +80,6 @@ void LaserRangeFinderPlugin::process(const ed::WorldModel& world, const sim::LUI
 
         if (e->shape())
         {
-            std::cout << e->id() << std::endl;
-
             // Set render options
             geo::LaserRangeFinder::RenderOptions opt;
             opt.setMesh(e->shape()->getMesh(), tc.transform());
