@@ -81,11 +81,14 @@ target_link_libraries(sim2 fast_simulator2)
 #                                              PLUGINS
 # ------------------------------------------------------------------------------------------------
 
-add_library(sim_base_controller plugins/base_controller.cpp)
-target_link_libraries(sim_base_controller fast_simulator2)
-
 add_library(sim_depth_sensor plugins/depth_sensor_plugin.cpp)
 target_link_libraries(sim_depth_sensor fast_simulator2)
+
+add_library(sim_laser_range_finder plugins/laser_range_finder_plugin.cpp)
+target_link_libraries(sim_laser_range_finder fast_simulator2)
+
+add_library(sim_base_controller plugins/base_controller.cpp)
+target_link_libraries(sim_base_controller fast_simulator2)
 
 add_library(sim_ros_robot plugins/ros_robot_plugin.cpp)
 target_link_libraries(sim_ros_robot fast_simulator2)

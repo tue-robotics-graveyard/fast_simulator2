@@ -45,7 +45,7 @@ PluginPtr PluginContainer::loadPlugin(const std::string plugin_name, const std::
 
     if (classes.empty())
     {
-        error += "Could not find any plugins in '" + class_loader_->getLibraryPath() + "'.";
+        error += "Could not find any plugins in '" + class_loader_->getLibraryPath() + "'. Did you forget to add the 'SIM_REGISTER_PLUGIN' macro?";
     } else if (classes.size() > 1)
     {
         error += "Multiple plugins registered in '" + class_loader_->getLibraryPath() + "'.";
