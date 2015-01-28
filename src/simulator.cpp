@@ -7,7 +7,6 @@
 
 // Object creation
 #include <tue/config/loaders/yaml.h>
-#include <ed/models/models.h>
 #include <ed/update_request.h>
 #include <ed/relation.h>
 

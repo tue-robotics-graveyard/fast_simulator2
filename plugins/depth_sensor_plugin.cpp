@@ -16,7 +16,6 @@
 #include <ros/node_handle.h>
 
 #include <ed/world_model.h>
-#include <ed/world_model/transform_crawler.h>
 #include <ed/uuid.h>
 #include <ed/entity.h>
 
@@ -128,25 +127,32 @@ void DepthSensorPlugin::process(const ed::WorldModel& world, const sim::LUId& ob
     // Get ROS current time
     ros::Time time = ros::Time::now();
 
+    geo::Pose3D camera_pose;
+    if (!world.calculateTransform("world", obj_id.id, time.toSec(), camera_pose))
+        return;
+
     cv::Mat depth_image;
     cv::Mat rgb_image;
 
     if (render_rgb_)
     {
-        rgb_image = cv::Mat(rgb_height_, rgb_width_, CV_8UC3, cv::Scalar(255,255,255));
+        rgb_image = cv::Mat(rgb_height_, rgb_width_, CV_8UC3, cv::Scalar(255, 255, 255));
     }
 
     if (render_depth_)
     {
+        // Calculate inverse camera pose, including correction for geolib frame
+        geo::Pose3D camera_pose_inv = geo::Pose3D(0, 0, 0, 3.1415, 0, 0) * camera_pose.inverse();
+
         depth_image = cv::Mat(depth_height_, depth_width_, CV_32FC1, 0.0);
-        for(ed::world_model::TransformCrawler tc(world, obj_id.id, world.latestTime()); tc.hasNext(); tc.next())
+        for(ed::WorldModel::const_iterator it = world.begin(); it != world.end(); ++it)
         {
-            const ed::EntityConstPtr& e = tc.entity();
+            const ed::EntityConstPtr& e = *it;
 
             if (e->shape())
             {
                 // Correction for geolib frame
-                geo::Pose3D rel_pose = geo::Pose3D(0, 0, 0, 3.1415, 0, 0) * tc.transform();
+                geo::Pose3D rel_pose = camera_pose_inv * e->pose();
 
                 // Set render options
                 geo::RenderOptions opt;

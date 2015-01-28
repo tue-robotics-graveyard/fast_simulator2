@@ -16,7 +16,6 @@
 #include <ros/node_handle.h>
 
 #include <ed/world_model.h>
-#include <ed/world_model/transform_crawler.h>
 #include <ed/uuid.h>
 #include <ed/entity.h>
 
@@ -76,17 +75,25 @@ void LaserRangeFinderPlugin::configure(tue::Configuration config, const sim::LUI
 
 void LaserRangeFinderPlugin::process(const ed::WorldModel& world, const sim::LUId& obj_id, double dt, ed::UpdateRequest& req)
 {
-    std::vector<double> ranges(lrf_.getNumBeams(), 0);
+    // Get ROS current time
+    ros::Time time = ros::Time::now();
 
-    for(ed::world_model::TransformCrawler tc(world, obj_id.id, world.latestTime()); tc.hasNext(); tc.next())
+    geo::Pose3D laser_pose;
+    if (!world.calculateTransform("world", obj_id.id, time.toSec(), laser_pose))
+        return;
+
+    geo::Pose3D laser_pose_inv = laser_pose.inverse();
+
+    std::vector<double> ranges(lrf_.getNumBeams(), 0);
+    for(ed::WorldModel::const_iterator it = world.begin(); it != world.end(); ++it)
     {
-        const ed::EntityConstPtr& e = tc.entity();
+        const ed::EntityConstPtr& e = *it;
 
         if (e->shape())
         {
             // Set render options
             geo::LaserRangeFinder::RenderOptions opt;
-            opt.setMesh(e->shape()->getMesh(), tc.transform());
+            opt.setMesh(e->shape()->getMesh(), laser_pose_inv * e->pose());
 
             geo::LaserRangeFinder::RenderResult res(ranges);
             lrf_.render(opt, res);
@@ -102,7 +109,7 @@ void LaserRangeFinderPlugin::process(const ed::WorldModel& world, const sim::LUI
         scan_.ranges[i] = ranges[i];
 
     // Stamp with current ROS time
-    scan_.header.stamp = ros::Time::now();
+    scan_.header.stamp = time;
 
     pub_.publish(scan_);
 }
