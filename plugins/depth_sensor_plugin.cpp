@@ -75,7 +75,7 @@ void DepthSensorPlugin::configure(tue::Configuration config, const sim::LUId& ob
         config.value("fy", fy);
 
         depth_rasterizer_.setOpticalTranslation(0, 0);
-        depth_rasterizer_.setOpticalCenter((depth_width_ + 1) / 2, (depth_height_ + 1) / 2);
+        depth_rasterizer_.setOpticalCenter(((double)depth_width_ + 1) / 2, ((double)depth_height_ + 1) / 2);
         depth_rasterizer_.setFocalLengths(fx, fy);
 
         render_depth_ = true;
