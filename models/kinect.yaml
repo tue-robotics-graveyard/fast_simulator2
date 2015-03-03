@@ -1,0 +1,12 @@
+plugins:
+  - name: kinect_depth_sensor
+    lib: libsim_depth_sensor.so 
+properties:
+    depth:
+        width: 640
+        height: 480
+        fx: 558
+        fy: 558
+    rgb:
+        width: 640
+        height: 480

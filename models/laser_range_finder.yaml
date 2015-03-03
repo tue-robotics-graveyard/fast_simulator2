@@ -1,0 +1,9 @@
+plugins:
+  - name: laser_range_finder
+    lib: libsim_laser_range_finder.so 
+properties:
+    num_beams: 1080
+    min_angle: -2
+    max_angle: 2
+    min_range: 0.05
+    max_range: 60

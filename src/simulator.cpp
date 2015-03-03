@@ -13,6 +13,10 @@
 #include <ed/world_model.h>
 #include <ed/relations/transform_cache.h>
 
+// Loading model files
+#include <ros/package.h>
+#include <fstream>
+
 namespace sim
 {
 
@@ -20,6 +24,7 @@ namespace sim
 
 Simulator::Simulator() : world_(new ed::WorldModel())
 {
+    model_path_ = ros::package::getPath("fast_simulator2") + "/models";
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -35,29 +40,40 @@ Simulator::~Simulator()
 
 // ----------------------------------------------------------------------------------------------------
 
-tue::Configuration expandObjectConfig(const std::map<std::string, std::string>& models, tue::Configuration config)
+tue::config::DataPointer Simulator::loadModelData(const std::string& type)
 {
-    std::string type;
-    if (config.value("type", type, tue::OPTIONAL))
-    {
-        std::map<std::string, std::string>::const_iterator it = models.find(type);
-        if (it != models.end())
-        {
-            tue::Configuration cfg;
-            tue::config::loadFromYAMLString(it->second, cfg);
-            cfg.data().add(config.data());
+    std::map<std::string, std::string>::const_iterator it = models_.find(type);
 
-            return cfg;
-        }
-        else
-        {
-            config.addError("Unknown object type: '" + type + "'.");
-        }
-    }
-    else
+    if (it != models_.end())
     {
-        return config;
+        tue::Configuration cfg;
+        tue::config::loadFromYAMLString(it->second, cfg);
+        return cfg.data();
     }
+
+    // Try loading model file
+    tue::filesystem::Path model_dir(model_path_ + "/" + type + ".yaml");
+    if (model_dir.exists())
+    {
+        std::ifstream f(model_dir.string().c_str());
+
+        if (!f.is_open())
+            return tue::config::DataPointer();
+
+        std::stringstream buffer;
+        buffer << f.rdbuf();
+
+        std::string data_str = buffer.str();
+
+        tue::Configuration cfg;
+        tue::config::loadFromYAMLString(data_str, cfg);
+
+        models_[type] = data_str;
+
+        return cfg.data();
+    }
+
+    return tue::config::DataPointer();
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -96,23 +112,24 @@ void Simulator::createObject(LUId parent_id, tue::Configuration config, ed::Upda
     else
         return;
 
-    std::map<std::string, std::string>::const_iterator it = models_.find(type);
-    if (it != models_.end())
+    tue::config::DataPointer model_data = loadModelData(type);
+    if (!model_data.empty())
     {
-        tue::Configuration expanded_config = expandObjectConfig(models_, config);
-        config.data().add(expanded_config.data());
-
-        // Add object and transform
-        req.setType(id, type);
+        model_data.add(config.data());
+        config = model_data;
     }
     else
     {
-        if (!model_loader_.create(config.data(), req))
+        // Try to load ED model
+        std::stringstream error;
+        if (!model_loader_.create(config.data(), req, error))
         {
-            config.addError("Unknown object type: '" + type + "'.");
+            config.addError("While loading object type '" + type + "': " + error.str());
             return;
         }
     }
+
+    req.setType(id, type);
 
     // Add relation from parent to child
     boost::shared_ptr<ed::TransformCache> t1(new ed::TransformCache());

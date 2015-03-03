@@ -45,9 +45,13 @@ private:
     // Models
     std::map<std::string, std::string> models_;
 
+    std::string model_path_;
+
     ed::models::ModelLoader model_loader_;
 
     void createObject(LUId parent_id, tue::Configuration config, ed::UpdateRequest& req);
+
+    tue::config::DataPointer loadModelData(const std::string& type);
 
     std::string getFullLibraryPath(const std::string& lib);
 

@@ -145,6 +145,9 @@ void DepthSensorPlugin::process(const ed::WorldModel& world, const sim::LUId& ob
         geo::Pose3D camera_pose_inv = geo::Pose3D(0, 0, 0, 3.1415, 0, 0) * camera_pose.inverse();
 
         depth_image = cv::Mat(depth_height_, depth_width_, CV_32FC1, 0.0);
+
+        DepthSensorRenderResult res(depth_image, depth_width_, depth_height_);
+
         for(ed::WorldModel::const_iterator it = world.begin(); it != world.end(); ++it)
         {
             const ed::EntityConstPtr& e = *it;
@@ -157,7 +160,6 @@ void DepthSensorPlugin::process(const ed::WorldModel& world, const sim::LUId& ob
                 // Set render options
                 geo::RenderOptions opt;
                 opt.setMesh(e->shape()->getMesh(), rel_pose);
-                DepthSensorRenderResult res(depth_image, depth_width_, depth_height_);
 
                 // Render
                 depth_rasterizer_.render(opt, res);

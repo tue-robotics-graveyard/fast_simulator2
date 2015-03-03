@@ -1,0 +1,35 @@
+plugins:
+  - name: amigo-ros_robot
+    lib: libsim_ros_robot.so
+properties:
+    urdf: $(rospkg amigo_description)/urdf/amigo.urdf
+objects:
+  - id: top_kinect
+    type: kinect
+    parent: amigo/top_kinect/openni_rgb_optical_frame
+    pose: {x: 0, y: 0, z: 0}
+    enabled: 1
+    properties:
+        topics:
+          - rgb: /amigo/top_kinect/rgb/image_color
+          - rgb: /amigo/top_kinect/rgb/image_color_rect
+          - rgb_info: /amigo/top_kinect/rgb/camera_info
+          - depth: /amigo/top_kinect/depth_registred/image
+          - depth: /amigo/top_kinect/depth_registred/image_rect
+          - depth_info: /amigo/top_kinect/depth_registered/camera_info
+          - rgbd: /amigo/top_kinect/rgbd
+        frame_id: /amigo/top_kinect/openni_rgb_optical_frame
+  - id: base_front_lrf
+    type: laser_range_finder
+    parent: amigo/base_laser
+    pose: {x: 0, y: 0, z: 0}
+    properties:
+        topic: /amigo/base_front_laser
+        frame_id: /amigo/base_laser            
+  - id: torso_lrf
+    type: laser_range_finder
+    parent: amigo/torso_laser
+    pose: {x: 0, y: 0, z: 0}
+    properties:
+        topic: /amigo/torso_laser
+        frame_id: /amigo/torso_laser
