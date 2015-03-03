@@ -4,12 +4,16 @@ objects:
     pose: {x: 0, y: 0, z: 0, yaw: 0}
   - id: amigo
     type: amigo
-    pose: {x: 1.5, y: 1.95, z: 0, yaw: 3.1415}
+    pose:
+        x: $(env ROBOT_INIT_X)    # 1.5
+        y: $(env ROBOT_INIT_Y)    # 1.95
+        z: 0
+        yaw: $(env ROBOT_INIT_PHI) # 3.1415
     properties:
         joints:
           - name: torso_joint
-            position: 0.4
+            position: 0.3
           - name: neck_pan_joint
             position: 0
           - name: neck_tilt_joint
-            position: 0.5
+            position: 0

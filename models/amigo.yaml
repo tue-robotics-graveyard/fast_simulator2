@@ -3,6 +3,8 @@ plugins:
     lib: libsim_ros_robot.so
 properties:
     urdf: $(rospkg amigo_description)/urdf/amigo.urdf
+    measurements_topic: /amigo/joint_states
+    publish_tf: 1
 objects:
   - id: top_kinect
     type: kinect
@@ -24,7 +26,7 @@ objects:
     parent: amigo/base_laser
     pose: {x: 0, y: 0, z: 0}
     properties:
-        topic: /amigo/base_front_laser
+        topic: /amigo/base_laser/scan
         frame_id: /amigo/base_laser            
   - id: torso_lrf
     type: laser_range_finder

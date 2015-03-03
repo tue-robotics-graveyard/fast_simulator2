@@ -7,6 +7,11 @@
 #include <ed/update_request.h>
 #include <ed/relation.h>
 
+#include <ros/publisher.h>
+#include <sensor_msgs/JointState.h>
+
+#include <tf/transform_broadcaster.h>
+
 // ----------------------------------------------------------------------------------------------------
 
 class JointRelation : public ed::Relation
@@ -22,6 +27,8 @@ public:
 
     void setJointPosition(float joint_pos) { joint_pos_ = joint_pos; }
 
+    float jointPosition() const { return joint_pos_; }
+
 private:
 
     float joint_pos_;
@@ -33,10 +40,19 @@ private:
 
 struct RelationInfo
 {
+    std::string joint_name;
     ed::UUID parent_id;
     ed::UUID child_id;
     ed::Idx r_idx;
     boost::shared_ptr<const JointRelation> relation;
+};
+
+// ----------------------------------------------------------------------------------------------------
+
+struct JointGroup
+{
+    ros::Publisher pub;
+    std::vector<RelationInfo*> joints;
 };
 
 // ----------------------------------------------------------------------------------------------------
@@ -47,6 +63,8 @@ class ROSRobotPlugin : public sim::Plugin
 public:
 
     ROSRobotPlugin();
+
+    ~ROSRobotPlugin();
 
     void configure(tue::Configuration config, const sim::LUId& obj_id);
 
@@ -67,6 +85,18 @@ private:
     bool updateJoint(const std::string& name, double pos, ed::UpdateRequest& req);
 
     void constructRobot(const ed::UUID& parent_id, const KDL::SegmentMap::const_iterator& it_segment, ed::UpdateRequest& req);
+
+
+    /// Publising
+
+    std::vector<JointGroup> joint_groups_;
+
+    void publishJointStates();
+
+
+    /// TF Publishing
+
+    tf::TransformBroadcaster* tf_broadcaster_;
 
 };
 

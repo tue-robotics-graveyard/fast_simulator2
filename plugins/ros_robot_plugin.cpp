@@ -7,8 +7,8 @@
 #include <fstream>
 #include <sstream>
 
-// Finding ros packages
-#include <ros/package.h>
+#include <ros/node_handle.h>
+#include <geolib/ros/tf_conversions.h>
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -24,140 +24,6 @@ bool JointRelation::calculateTransform(const ed::Time& t, geo::Pose3D& tf) const
     return true;
 }
 
-// ----------------------------------------------------------------------------------------------------
-//
-//                                   RESOLVE FUNCTION PARSING
-//
-// ----------------------------------------------------------------------------------------------------
-
-bool executeResolvefunction(const std::vector<std::string>& args, std::string& result, std::stringstream& error)
-{
-    if (args[0] == "rospkg" && args.size() == 2)
-    {
-        result = ros::package::getPath(args[1]);
-        if (result.empty())
-        {
-            error << "ROS package '" << args[1] << "' unknown.";
-            return false;
-        }
-
-        return true;
-    }
-    else if (args[0] == "env" && (args.size() == 2 || args.size() == 3))
-    {
-        char* env_value;
-        env_value = getenv(args[1].c_str());
-        if (env_value == 0)
-        {
-            if (args.size() == 3)
-            {
-                // Default value
-                result = args[2];
-                return true;
-            }
-
-            error << "Environment variable '" << args[1] << "' unknown.";
-            return false;
-        }
-
-        result = env_value;
-        return true;
-    }
-
-    error << "Unknown resolve function: '" << args[0] << "' with " << args.size() - 1 << " arguments.";
-
-    return false;
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-bool parseResolveFunction(const std::string& str, std::size_t& i, std::string& result, std::stringstream& error)
-{
-    std::vector<std::string> args;
-    args.push_back("");
-
-    for(; i < str.size();)
-    {
-        char c = str[i];
-
-        if (c == '$' && (i + 1) < str.size() && str[i + 1] == '(')
-        {
-            // Skip "$("
-            i += 2;
-
-            std::string arg;
-            if (!parseResolveFunction(str, i, arg, error))
-                return false;
-
-            args.back() += arg;
-            continue;
-        }
-        else if (c == ')')
-        {
-            ++i;
-
-            // Check if last argument is empty. If so, remove it
-            if (args.back().empty())
-                args.pop_back();
-
-            // Check if args are empty. Is so, return false
-            if (args.empty())
-            {
-                error << "Empty resolve function.";
-                return false;
-            }
-
-            return executeResolvefunction(args, result, error);
-        }
-        else if (c == ' ')
-        {
-            if (!args.back().empty())
-                args.push_back("");
-            ++i;
-        }
-        else
-        {
-            args.back() += c;
-            ++i;
-        }
-    }
-
-    error << "Missing ')'.";
-    return false;
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-bool resolve(const std::string& str, std::string& result, std::stringstream& error)
-{
-    std::size_t i = 0;
-
-    while(i < str.size())
-    {
-        std::size_t i_sign = str.find("$(", i);
-        if (i_sign == std::string::npos)
-        {
-            result += str.substr(i);
-            return true;
-        }
-
-        result += str.substr(i, i_sign - i);
-
-        // Skip until after "$("
-        i = i_sign + 2;
-
-        std::string subresult;
-        if (!parseResolveFunction(str, i, subresult, error))
-            return false;
-
-        result += subresult;
-    }
-
-    error << "Missing ')'.";
-    return false;
-}
-
-// ----------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------
 
 void ROSRobotPlugin::constructRobot(const ed::UUID& parent_id, const KDL::SegmentMap::const_iterator& it_segment, ed::UpdateRequest& req)
@@ -177,6 +43,7 @@ void ROSRobotPlugin::constructRobot(const ed::UUID& parent_id, const KDL::Segmen
 
     // Generate relation info that will be used to update the relation
     RelationInfo& rel_info = joint_name_to_rel_info_[segment.getJoint().getName()];
+    rel_info.joint_name = segment.getJoint().getName();
     rel_info.parent_id = parent_id;
     rel_info.child_id = child_id;
     rel_info.r_idx = ed::INVALID_IDX;
@@ -190,8 +57,15 @@ void ROSRobotPlugin::constructRobot(const ed::UUID& parent_id, const KDL::Segmen
 
 // ----------------------------------------------------------------------------------------------------
 
-ROSRobotPlugin::ROSRobotPlugin()
+ROSRobotPlugin::ROSRobotPlugin() : tf_broadcaster_(0)
 {
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+ROSRobotPlugin::~ROSRobotPlugin()
+{
+    delete tf_broadcaster_;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -203,19 +77,11 @@ void ROSRobotPlugin::configure(tue::Configuration config, const sim::LUId& obj_i
     std::string urdf_file;
     if (config.value("urdf", urdf_file))
     {
-        std::string urdf_file_resolved;
-        std::stringstream resolve_error;
-        if (!resolve(urdf_file, urdf_file_resolved, resolve_error))
-        {
-            config.addError("Could not resolve 'urdf' value '" + urdf_file + "': " + resolve_error.str());
-            return;
-        }
-
-        std::ifstream f(urdf_file_resolved.c_str());
+        std::ifstream f(urdf_file.c_str());
 
         if (!f.is_open())
         {
-            config.addError("Could not load URDF description. File not found: '" + urdf_file_resolved + "'.");
+            config.addError("Could not load URDF description. File not found: '" + urdf_file + "'.");
             return;
         }
 
@@ -255,6 +121,32 @@ void ROSRobotPlugin::configure(tue::Configuration config, const sim::LUId& obj_i
 
         config.endArray();
     }
+
+    // Init ROS (if needed)
+    if (!ros::isInitialized())
+         ros::init(ros::M_string(), "simulator", ros::init_options::NoSigintHandler);
+
+    std::string measurements_topic;
+    if (config.value("measurements_topic", measurements_topic))
+    {
+        ros::NodeHandle nh;
+
+        joint_groups_.push_back(JointGroup());
+        JointGroup& jg = joint_groups_.back();
+        jg.pub = nh.advertise<sensor_msgs::JointState>(measurements_topic, 100);
+
+        // Add all joints to the group
+        for(std::map<std::string, RelationInfo>::iterator it = joint_name_to_rel_info_.begin(); it != joint_name_to_rel_info_.end(); ++it)
+        {
+            jg.joints.push_back(&(it->second));
+        }
+    }
+
+    int publish_tf;
+    if(config.value("publish_tf", publish_tf, tue::OPTIONAL) && publish_tf)
+        tf_broadcaster_ = new tf::TransformBroadcaster;
+    else
+        delete tf_broadcaster_;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -289,6 +181,54 @@ void ROSRobotPlugin::process(const ed::WorldModel& world, const sim::LUId& obj_i
         init_update_request_ = ed::UpdateRequest();
 
         return;
+    }
+
+    publishJointStates();
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void ROSRobotPlugin::publishJointStates()
+{    
+    ros::Time ros_time = ros::Time::now();
+
+    for(std::vector<JointGroup>::const_iterator it = joint_groups_.begin(); it != joint_groups_.end(); ++it)
+    {
+        const JointGroup& jg = *it;
+
+        sensor_msgs::JointState js_msg;
+        js_msg.header.stamp = ros_time;
+        for(std::vector<RelationInfo*>::const_iterator it_joint = jg.joints.begin(); it_joint != jg.joints.end(); ++it_joint)
+        {
+            const RelationInfo* info = *it_joint;
+            js_msg.name.push_back(info->joint_name);
+            js_msg.position.push_back(info->relation->jointPosition());
+        }
+
+        jg.pub.publish(js_msg);
+    }
+
+    if (tf_broadcaster_)
+    {
+        std::vector<tf::StampedTransform> transforms;
+        for(std::map<std::string, RelationInfo>::const_iterator it = joint_name_to_rel_info_.begin(); it != joint_name_to_rel_info_.end(); ++it)
+        {
+            const RelationInfo& rel = it->second;
+
+            // Calculate joint pose for this joint position
+            geo::Pose3D pose;
+            rel.relation->calculateTransform(rel.relation->latestTime(), pose);
+
+            transforms.push_back(tf::StampedTransform());
+            tf::StampedTransform& pose_tf = transforms.back();
+
+            geo::convert(pose, pose_tf);
+            pose_tf.frame_id_ = rel.parent_id.str();
+            pose_tf.child_frame_id_ = rel.child_id.str();
+            pose_tf.stamp_ = ros_time;
+        }
+
+        tf_broadcaster_->sendTransform(transforms);
     }
 }
 
