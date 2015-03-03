@@ -110,8 +110,10 @@ void Simulator::createObject(LUId parent_id, tue::Configuration config, ed::Upda
     if (!config.value("id", id))
         return;
 
-    if (!type.empty())
-        req.setType(id, type);
+
+    if (type.empty())
+        type == "_UNKNOWN_";
+    req.setType(id, type);
 
     // Optionally set another parent
     if (config.value("parent", parent_id.id, tue::OPTIONAL))

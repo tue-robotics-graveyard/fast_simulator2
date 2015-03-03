@@ -30,6 +30,13 @@ void ROSRobotPlugin::constructRobot(const ed::UUID& parent_id, const KDL::Segmen
 {
     const KDL::Segment& segment = it_segment->second.segment;
 
+    if (segment.getJoint().getName() == "NoName")
+    {
+        std::cout << "Do something!" << std::endl;
+    }
+
+
+
     // Child ID is the segment (link) name
     ed::UUID child_id = robot_name_ + "/" + segment.getName();
 
