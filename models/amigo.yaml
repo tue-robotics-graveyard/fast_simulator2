@@ -35,3 +35,11 @@ objects:
     properties:
         topic: /amigo/torso_laser
         frame_id: /amigo/torso_laser
+  - id: base
+    parent: amigo/base_link
+    pose: {x: 0, y: 0, z: 0}
+    plugins:
+      - name: base_controller
+        lib: libsim_base_controller.so
+       
+ 

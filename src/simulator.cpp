@@ -84,11 +84,34 @@ void Simulator::createObject(LUId parent_id, tue::Configuration config, ed::Upda
     // the user to easily enable and disable certain objects with one single flag.
     int enabled;
     if (config.value("enabled", enabled, tue::OPTIONAL) && !enabled)
+        return;   
+
+    std::string type;
+    if (config.value("type", type, tue::OPTIONAL))
+    {
+        tue::config::DataPointer model_data = loadModelData(type);
+        if (!model_data.empty())
+        {
+            config.data().add(model_data);
+        }
+        else
+        {
+            // Try to load ED model
+            std::stringstream error;
+            if (!model_loader_.create(config.data(), req, error))
+            {
+                config.addError("While loading object type '" + type + "': " + error.str());
+                return;
+            }
+        }
+    }
+
+    std::string id;
+    if (!config.value("id", id))
         return;
 
-    std::string id, type;
-    if (!config.value("id", id) || !config.value("type", type))
-        return;
+    if (!type.empty())
+        req.setType(id, type);
 
     // Optionally set another parent
     if (config.value("parent", parent_id.id, tue::OPTIONAL))
@@ -111,25 +134,6 @@ void Simulator::createObject(LUId parent_id, tue::Configuration config, ed::Upda
     }
     else
         return;
-
-    tue::config::DataPointer model_data = loadModelData(type);
-    if (!model_data.empty())
-    {
-        model_data.add(config.data());
-        config = model_data;
-    }
-    else
-    {
-        // Try to load ED model
-        std::stringstream error;
-        if (!model_loader_.create(config.data(), req, error))
-        {
-            config.addError("While loading object type '" + type + "': " + error.str());
-            return;
-        }
-    }
-
-    req.setType(id, type);
 
     // Add relation from parent to child
     boost::shared_ptr<ed::TransformCache> t1(new ed::TransformCache());
@@ -172,6 +176,7 @@ void Simulator::createObject(LUId parent_id, tue::Configuration config, ed::Upda
         while(config.nextArrayItem())
         {
             createObject(id, config, req);
+
         }
         config.endArray();
     }
