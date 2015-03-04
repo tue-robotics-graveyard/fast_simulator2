@@ -5,6 +5,8 @@
 
 #include <tf/transform_broadcaster.h>
 
+#include <ros/callback_queue.h>
+
 class BaseController : public sim::Plugin
 {
 
@@ -21,6 +23,15 @@ public:
 private:
 
     tf::TransformBroadcaster* tf_broadcaster_;
+
+    ros::Subscriber sub_ref_;
+
+    ros::CallbackQueue cb_queue_;
+
+    void referenceCallback(const geometry_msgs::Twist::ConstPtr& msg);
+
+    geo::Vec2 vel_trans_;
+    double vel_angular_;
 
 };
 

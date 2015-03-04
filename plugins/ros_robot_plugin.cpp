@@ -30,13 +30,6 @@ void ROSRobotPlugin::constructRobot(const ed::UUID& parent_id, const KDL::Segmen
 {
     const KDL::Segment& segment = it_segment->second.segment;
 
-    if (segment.getJoint().getName() == "NoName")
-    {
-        std::cout << "Do something!" << std::endl;
-    }
-
-
-
     // Child ID is the segment (link) name
     ed::UUID child_id = robot_name_ + "/" + segment.getName();
 
@@ -48,13 +41,16 @@ void ROSRobotPlugin::constructRobot(const ed::UUID& parent_id, const KDL::Segmen
     r->setJointPosition(0);
     req.setRelation(parent_id, child_id, r);
 
-    // Generate relation info that will be used to update the relation
-    RelationInfo& rel_info = joint_name_to_rel_info_[segment.getJoint().getName()];
-    rel_info.joint_name = segment.getJoint().getName();
-    rel_info.parent_id = parent_id;
-    rel_info.child_id = child_id;
-    rel_info.r_idx = ed::INVALID_IDX;
-    rel_info.relation = r;
+    if (segment.getJoint().getName() != "NoName") // TODO: This check is horrible. Isn't there a better way?
+    {
+        // Generate relation info that will be used to update the relation
+        RelationInfo& rel_info = joint_name_to_rel_info_[segment.getJoint().getName()];
+        rel_info.joint_name = segment.getJoint().getName();
+        rel_info.parent_id = parent_id;
+        rel_info.child_id = child_id;
+        rel_info.r_idx = ed::INVALID_IDX;
+        rel_info.relation = r;
+    }
 
     // Recursively add all children
     const std::vector<KDL::SegmentMap::const_iterator>& children = it_segment->second.children;

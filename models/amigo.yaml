@@ -1,10 +1,13 @@
 plugins:
   - name: amigo-ros_robot
     lib: libsim_ros_robot.so
+  - name: base_controller
+    lib: libsim_base_controller.so
 properties:
     urdf: $(rospkg amigo_description)/urdf/amigo.urdf
     measurements_topic: /amigo/joint_states
     publish_tf: 1
+    base_reference_topic: /amigo/base/references
 objects:
   - id: top_kinect
     type: kinect
@@ -35,11 +38,5 @@ objects:
     properties:
         topic: /amigo/torso_laser
         frame_id: /amigo/torso_laser
-  - id: base
-    parent: amigo/base_link
-    pose: {x: 0, y: 0, z: 0}
-    plugins:
-      - name: base_controller
-        lib: libsim_base_controller.so
        
  
